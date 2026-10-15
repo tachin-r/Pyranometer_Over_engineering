@@ -6,14 +6,14 @@ Modular High-Precision Pyranometer KiCad Hardware Project.
 
 ## 📑 Project Structure & Interactive Online Viewers
 
-คุณสามารถกดเปิดดูวงจรและ PCB ของแต่ละบอร์ดผ่าน **KiCanvas** ได้ทันทีโดยไม่ต้องติดตั้งโปรแกรม KiCad:
+คุณสามารถกดเปิดดูวงจรและ PCB ของแต่ละบอร์ดผ่าน **KiCanvas** ได้ทันทีในเว็บเบราว์เซอร์:
 
-| บอร์ด / โมดูล | คำอธิบาย | ดู Schematic (วงจร) | ดู PCB (ลายวงจร) |
-| :--- | :--- | :---: | :---: |
-| **L1_Analog** | Analog Front-End & Sensor Interface | [🔍 เปิด Schematic](https://kicanvas.org/https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L1_Analog/L1_Analog.kicad_sch) | [🔍 เปิด PCB](https://kicanvas.org/https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L1_Analog/L1_Analog.kicad_pcb) |
-| **L2_MCU** | Microcontroller Unit (MCU) Board | [🔍 เปิด Schematic](https://kicanvas.org/https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L2_MCU/L2_MCU.kicad_sch) | [🔍 เปิด PCB](https://kicanvas.org/https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L2_MCU/L2_MCU.kicad_pcb) |
-| **L3_Switching** | Power Management & Switching Regulators | [🔍 เปิด Schematic](https://kicanvas.org/https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L3_Switching/L3_Switching.kicad_sch) | [🔍 เปิด PCB](https://kicanvas.org/https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L3_Switching/L3_Switching.kicad_pcb) |
-| **LM2596 HW-411** | Reverse Engineered Buck Converter Module | [🔍 เปิด Schematic](https://kicanvas.org/https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/reverse_component/LM2596_HW411/LM2596_HW411.kicad_sch) | [🔍 เปิด PCB](https://kicanvas.org/https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/reverse_component/LM2596_HW411/LM2596_HW411.kicad_pcb) |
+| บอร์ด / โมดูล | คำอธิบาย | เปิดดูโปรเจกต์เต็ม (Schematic + PCB) | ดูเฉพาะ Schematic | ดูเฉพาะ PCB |
+| :--- | :--- | :---: | :---: | :---: |
+| **L1_Analog** | Analog Front-End & Sensor Interface | [🚀 เปิดบอร์ด L1](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/tree/main/L1_Analog) | [🔍 Schematic](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L1_Analog/L1_Analog.kicad_sch) | [🔍 PCB](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L1_Analog/L1_Analog.kicad_pcb) |
+| **L2_MCU** | Microcontroller Unit (MCU) Board | [🚀 เปิดบอร์ด L2](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/tree/main/L2_MCU) | [🔍 Schematic](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L2_MCU/L2_MCU.kicad_sch) | [🔍 PCB](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L2_MCU/L2_MCU.kicad_pcb) |
+| **L3_Switching** | Power Management & Switching Regulators | [🚀 เปิดบอร์ด L3](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/tree/main/L3_Switching) | [🔍 Schematic](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L3_Switching/L3_Switching.kicad_sch) | [🔍 PCB](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/L3_Switching/L3_Switching.kicad_pcb) |
+| **LM2596 HW-411** | Reverse Engineered Buck Converter Module | [🚀 เปิดบอร์ด LM2596](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/tree/main/reverse_component/LM2596_HW411) | [🔍 Schematic](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/reverse_component/LM2596_HW411/LM2596_HW411.kicad_sch) | [🔍 PCB](https://kicanvas.org/?github=https://github.com/tachin-r/Pyranometer_Over_engineering/blob/main/reverse_component/LM2596_HW411/LM2596_HW411.kicad_pcb) |
 
 ---
 
