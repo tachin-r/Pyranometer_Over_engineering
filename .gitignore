@@ -1,0 +1,28 @@
+# KiCad temporary and auto-generated files
+*.net
+*.wbk
+*.kicad_prl
+*.bak
+*_autosave-*
+*.tmp
+*~
+~*
+*.lck
+
+# Backup directories and local history
+*-backups/
+.history/
+
+# KiCad cache
+fp-info-cache
+[._]*.sdb
+[._]*.ldb
+
+# Logs
+*.log
+3DxService.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
