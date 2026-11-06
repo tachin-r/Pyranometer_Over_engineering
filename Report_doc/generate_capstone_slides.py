@@ -1002,13 +1002,69 @@ def create_presentation():
         r_b.font.color.rgb = C_TEXT_SUB
 
     # =========================================================================
-    # SLIDE 12: Embedded Firmware & IoT Platform
+    # SLIDE 12: Custom 4-Layer PCB Design (V1.1 L1 by Tachin)
     # =========================================================================
     slide12 = prs.slides.add_slide(blank_layout)
     set_slide_background(slide12, C_BG_LIGHT)
-    add_header(slide12, "Firmware & IoT Platform", "เฟิร์มแวร์ไมโครคอนโทรลเลอร์ ESP32-C6 และระบบ IoT Web Server",
-               "การควบคุมบัสสื่อสาร SPI, การเฝ้าระวัง Watchdog และการรายงานข้อมูลสดแบบไร้สายผ่านเครือข่าย Wi-Fi")
+    add_header(slide12, "Hardware Engineering", "การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์ (Custom 4-Layer Sensor Head PCB)",
+               "รุ่น V1.1 L1 by Tachin — ออกแบบตามหลัก Low-Noise Precision Analog บน KiCad 10 และผ่านการตรวจ DRC 100%")
     add_footer(slide12, 12)
+
+    # Left: Two 3D Renders (Top View & Isometric View)
+    p_pcb_top = os.path.join(img_dir, "pcb_3d_render_top.png")
+    p_pcb_iso = os.path.join(img_dir, "pcb_3d_render_iso.png")
+    if os.path.exists(p_pcb_top) and os.path.exists(p_pcb_iso):
+        slide12.shapes.add_picture(p_pcb_top, Inches(0.8), Inches(1.75), width=Inches(2.7))
+        slide12.shapes.add_picture(p_pcb_iso, Inches(3.6), Inches(1.75), width=Inches(2.7))
+    elif os.path.exists(p_pcb_iso):
+        slide12.shapes.add_picture(p_pcb_iso, Inches(0.8), Inches(1.75), width=Inches(5.5))
+
+    # Right: PCB Architecture Card
+    c_pcb = add_card(slide12, 6.5, 1.75, 6.033, 5.0)
+    tf_pcb = c_pcb.text_frame
+    tf_pcb.word_wrap = True
+    tf_pcb.margin_left = tf_pcb.margin_right = tf_pcb.margin_top = tf_pcb.margin_bottom = Inches(0.2)
+    p = tf_pcb.paragraphs[0]
+    r = p.add_run()
+    r.text = "สถาปัตยกรรมการออกแบบแผ่นวงจรพิมพ์ V1.1 L1"
+    r.font.name = FONT_HEAD
+    r.font.size = Pt(13.5)
+    r.font.bold = True
+    r.font.color.rgb = C_BLUE_BRAND
+
+    pts_pcb = [
+        ("โครงสร้างทรงกลมกะทัดรัด (Circular Sensor Head):", 
+         "ออกแบบแผ่นวงจรรูปทรงกลมเพื่อติดตั้งลงในกระบอกสูบตัวเรือนเซนเซอร์วัดรังสีอาทิตย์ได้อย่างสมบูรณ์แบบ ลดขนาดสายเชื่อมต่อภายนอก"),
+        ("ตำแหน่งเซนเซอร์และ RT1 สมดุลกึ่งกลาง (Co-located Sensing):", 
+         "จัดวาง BPX 61 ตรงกึ่งกลางบอร์ด พร้อมวาง RT1 (Thermistor 103AT-2) ประกบชิดผิวเซนเซอร์ เพื่อตรวจวัดอุณหภูมิจริงและทำ Temperature Compensation อย่างแม่นยำ"),
+        ("ยกระดับสู่อุปกรณ์ความเที่ยงตรงสูง (Precision IC Upgrades):", 
+         "ปรับใช้ REF5045AIDGKR ในตัวถัง VSSOP-8 (MSOP-8) ขนาดเล็กพิเศษ ร่วมกับ OPA380 TIA และชิป 24-bit ADC (ADS1220 TSSOP-16) ลดขนาด Loop และสัญญาณรบกวน"),
+        ("สถาปัตยกรรม 4 เลเยอร์ (Continuous Ground Plane):", 
+         "จัดสรร In1.Cu เป็น Solid Ground Plane ไร้รอยตัด ช่วยขจัดปัญหา Ground Bounce, IR Drop (~5-10 mV) และ Stray Inductance ที่เคยพบจากการต่อสาย Point-to-point"),
+        ("พร้อมส่งผลิตโรงงาน (100% DRC Zero Violations):", 
+         "ผ่านการตรวจสอบ Design Rules Check (DRC) บน KiCad 10.0 ครบถ้วน ไร้ข้อผิดพลาด (0 Violations / 0 Unconnected items) พร้อมส่งผลิต (PCBWay/JLCPCB) ใน Capstone 2")
+    ]
+    for h, b in pts_pcb:
+        p_i = tf_pcb.add_paragraph()
+        p_i.space_before = Pt(5)
+        r_h = p_i.add_run()
+        r_h.text = f"• {h}\n"
+        r_h.font.bold = True
+        r_h.font.size = Pt(9.8)
+        r_h.font.color.rgb = C_TEXT_MAIN
+        r_b = p_i.add_run()
+        r_b.text = f"   {b}"
+        r_b.font.size = Pt(9.2)
+        r_b.font.color.rgb = C_TEXT_SUB
+
+    # =========================================================================
+    # SLIDE 13: Embedded Firmware & IoT Platform
+    # =========================================================================
+    slide13 = prs.slides.add_slide(blank_layout)
+    set_slide_background(slide13, C_BG_LIGHT)
+    add_header(slide13, "Firmware & IoT Platform", "เฟิร์มแวร์ไมโครคอนโทรลเลอร์ ESP32-C6 และระบบ IoT Web Server",
+               "การควบคุมบัสสื่อสาร SPI, การเฝ้าระวัง Watchdog และการรายงานข้อมูลสดแบบไร้สายผ่านเครือข่าย Wi-Fi")
+    add_footer(slide13, 13)
 
     # Left: Serial Monitor Output Image
     p_ser = os.path.join(img_dir, "Read value from ardunio.png")
@@ -1049,13 +1105,13 @@ def create_presentation():
         r_b.font.color.rgb = C_TEXT_SUB
 
     # =========================================================================
-    # SLIDE 13: Live Experimental Results on Breadboard
+    # SLIDE 14: Live Experimental Results on Breadboard
     # =========================================================================
-    slide13 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide13, C_BG_LIGHT)
-    add_header(slide13, "Experimental Results", "ผลการทดสอบการอ่านค่าจริงบน Breadboard ใน 4 สภาวะแสง",
+    slide14 = prs.slides.add_slide(blank_layout)
+    set_slide_background(slide14, C_BG_LIGHT)
+    add_header(slide14, "Experimental Results", "ผลการทดสอบการอ่านค่าจริงบน Breadboard ใน 4 สภาวะแสง",
                "การพิสูจน์การตอบสนองเชิงไดนามิกและการตัดทอนออฟเซ็ตด้วยเทคนิค Pseudo-Differential")
-    add_footer(slide13, 13)
+    add_footer(slide14, 14)
 
     # Big Clean Table for Results
     rows = 5
@@ -1065,7 +1121,7 @@ def create_presentation():
     width = Inches(11.733)
     height = Inches(3.2)
 
-    table_shape = slide13.shapes.add_table(rows, cols, left, top, width, height)
+    table_shape = slide14.shapes.add_table(rows, cols, left, top, width, height)
     t = table_shape.table
 
     # Column widths
@@ -1119,7 +1175,7 @@ def create_presentation():
                 r.font.color.rgb = C_TEXT_MAIN
 
     # Summary Takeaway Banner Below Table
-    c_res = add_card(slide13, 0.8, 5.3, 11.733, 1.4, bg_rgb=RGBColor(240, 253, 244), border_rgb=C_GREEN_OK)
+    c_res = add_card(slide14, 0.8, 5.3, 11.733, 1.4, bg_rgb=RGBColor(240, 253, 244), border_rgb=C_GREEN_OK)
     tf_r = c_res.text_frame
     tf_r.word_wrap = True
     tf_r.margin_left = tf_r.margin_right = tf_r.margin_top = tf_r.margin_bottom = Inches(0.15)
@@ -1144,13 +1200,13 @@ def create_presentation():
         r_pt.font.color.rgb = C_TEXT_SUB
 
     # =========================================================================
-    # SLIDE 14: Capstone 2 Roadmap & Implementation Milestones
+    # SLIDE 15: Capstone 2 Roadmap & Implementation Milestones
     # =========================================================================
-    slide14 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide14, C_BG_LIGHT)
-    add_header(slide14, "Future Roadmap", "แผนการดำเนินงานระยะถัดไปในโครงงาน 2 (Capstone Project 2)",
+    slide15 = prs.slides.add_slide(blank_layout)
+    set_slide_background(slide15, C_BG_LIGHT)
+    add_header(slide15, "Future Roadmap", "แผนการดำเนินงานระยะถัดไปในโครงงาน 2 (Capstone Project 2)",
                "กรอบระยะเวลาและเป้าหมายการยกระดับความเที่ยงตรงสู่มาตรฐานสากล ISO 9060 Class A")
-    add_footer(slide14, 14)
+    add_footer(slide15, 15)
 
     # 4 Milestone Horizontal Cards
     w_m = 2.75
@@ -1161,7 +1217,7 @@ def create_presentation():
         ("Milestone 1 (พ.ย. - ธ.ค. 2569)", "Hardware Fabrication & LDO Post-Regulation", C_BLUE_BRAND, [
             "บัดกรีประกอบวงจรลงบน Perfboard",
             "ติดตั้งตัวเก็บประจุ 10 µF X7R Low-ESR",
-            "ออกแบบแผ่นวงจรพิมพ์ Custom PCB",
+            "สั่งผลิตแผ่นวงจรพิมพ์ Custom 4-Layer PCB",
             "เพิ่ม Ultra-Low-Noise LDO (TPS7A)",
             "ทดสอบระดับ Noise Floor < 4 µV_RMS"
         ]),
@@ -1189,7 +1245,7 @@ def create_presentation():
     ]
 
     for idx, (m_title, m_sub, m_col, m_pts) in enumerate(milestones):
-        card = add_card(slide14, m_lefts[idx], 1.85, w_m, h_m, border_rgb=m_col, border_pt=1.5)
+        card = add_card(slide15, m_lefts[idx], 1.85, w_m, h_m, border_rgb=m_col, border_pt=1.5)
         tf_m = card.text_frame
         tf_m.word_wrap = True
         tf_m.margin_left = tf_m.margin_right = tf_m.margin_top = tf_m.margin_bottom = Inches(0.15)
@@ -1220,13 +1276,13 @@ def create_presentation():
             r_pt.font.color.rgb = C_TEXT_SUB
 
     # =========================================================================
-    # SLIDE 15: Conclusion & Discussion / Q&A (Dark Executive Theme)
+    # SLIDE 16: Conclusion & Discussion / Q&A (Dark Executive Theme)
     # =========================================================================
-    slide15 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide15, C_NAVY_DARK)
+    slide16 = prs.slides.add_slide(blank_layout)
+    set_slide_background(slide16, C_NAVY_DARK)
 
     # Top Section: Title & 3 Accomplishment Bullets
-    tb_end = slide15.shapes.add_textbox(Inches(1.2), Inches(0.65), Inches(10.933), Inches(3.3))
+    tb_end = slide16.shapes.add_textbox(Inches(1.2), Inches(0.65), Inches(10.933), Inches(3.3))
     tf_e = tb_end.text_frame
     tf_e.word_wrap = True
     tf_e.margin_left = tf_e.margin_right = tf_e.margin_top = tf_e.margin_bottom = 0
@@ -1242,6 +1298,7 @@ def create_presentation():
 
     bullets = [
         ("ความสำเร็จด้านฮาร์ดแวร์และซอฟต์แวร์:", "พิสูจน์การทำงานจริงของวงจร AFE 24 บิต บน Breadboard ร่วมกับ REF5045 (4.500 V) และ ESP32-C6 Web Server รายงานข้อมูลได้สำเร็จสมบูรณ์"),
+        ("การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์ (V1.1 L1):", "ออกแบบ Custom 4-Layer PCB สมบูรณ์แบบด้วย KiCad 10.0 ผ่านการตรวจสอบ DRC 100% (Zero Violations) พร้อมส่งผลิตสำหรับ Capstone 2"),
         ("การค้นพบสำคัญทางทัศนศาสตร์:", "ชี้ชัดว่าตัวถัง TO-39 (BPX 61) มีการตัดแสงรุนแรงที่ 44° และยืนยันว่า BPW 34 ให้การตอบสนองที่สอดคล้องกับมาตรฐาน ISO 9060 Class A มากกว่า"),
         ("ความพร้อมในการทดสอบจริง:", "จัดทำข้อเสนอการทดลองทางทัศนศาสตร์ (Proposed Lab Methodology) ไว้อย่างชัดเจน ทั้งแผนวัดสเปกตรัมและแผนวัดมุมด้วยแท่นหมุน")
     ]
@@ -1259,7 +1316,7 @@ def create_presentation():
         r_b.font.color.rgb = C_TEXT_MUTED
 
     # Middle Section: Questions for Dr. Prathan Banner Card
-    c_q = add_card(slide15, 1.2, 4.05, 10.933, 2.15, bg_rgb=C_SLATE_CARD, border_rgb=C_CYAN_ACCENT, border_pt=1.5)
+    c_q = add_card(slide16, 1.2, 4.05, 10.933, 2.15, bg_rgb=C_SLATE_CARD, border_rgb=C_CYAN_ACCENT, border_pt=1.5)
     tf_q = c_q.text_frame
     tf_q.word_wrap = True
     tf_q.margin_left = tf_q.margin_right = tf_q.margin_top = tf_q.margin_bottom = Inches(0.18)
@@ -1286,7 +1343,7 @@ def create_presentation():
         r_qi.font.color.rgb = C_TEXT_LIGHT
 
     # Bottom Section: Thank you / Q&A Box
-    tb_ty = slide15.shapes.add_textbox(Inches(1.2), Inches(6.35), Inches(10.933), Inches(0.6))
+    tb_ty = slide16.shapes.add_textbox(Inches(1.2), Inches(6.35), Inches(10.933), Inches(0.6))
     tf_ty = tb_ty.text_frame
     tf_ty.margin_left = tf_ty.margin_right = tf_ty.margin_top = tf_ty.margin_bottom = 0
     p_ty = tf_ty.paragraphs[0]
