@@ -38,3 +38,12 @@ Explore the schematics and PCB layouts interactively directly in your browser po
 This project is organized as a **modular multi-board system**:
 * Each sub-directory contains its own standalone KiCad project file (`.kicad_pro`).
 * To view or edit a board, open the corresponding `.kicad_pro` file inside its respective directory.
+
+---
+
+## 🔬 Capstone Documentation & Laboratory Calibration
+
+* **[☀️ Solar Simulator Preparation & Contact Guide](file:///c:/Users/usEr/Documents/KiCad/10.0/projects/Pyranometer_Over_engineering/Report_doc/SOLAR_SIMULATOR_GUIDE.md)**: Contact templates, technical phone checklists, and procedures for using the **Solar Light XPS-300** at ATTAC / Nano Central Lab (Building 55, 3rd Floor).
+* **[📷 Perfboard Photo & Figure Insertion Guide](file:///c:/Users/usEr/Documents/KiCad/10.0/projects/Pyranometer_Over_engineering/Report_doc/PHOTO_GUIDE_PERFBOARD.md)**: Complete image checklist and tips for inserting hardware photos into the report.
+* **[📄 Capstone Progress Report V2 (.docx)](file:///c:/Users/usEr/Documents/KiCad/10.0/projects/Pyranometer_Over_engineering/Report_doc/69_IoT_Project1_Report_V2.docx)**: Official 5-chapter thesis report draft formatted to KMITL guidelines.
+

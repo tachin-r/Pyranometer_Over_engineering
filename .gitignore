@@ -26,3 +26,20 @@ fp-info-cache
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Office and report generation temporary files
+Report_doc/~$*
+Report_doc/*.tmp
+Report_doc/__pycache__/
+Report_doc/*_backup*.docx
+Report_doc/*_backupv*.docx
+Report_doc/*_Progress.docx
+Report_doc/*_Latest.docx
+Report_doc/*_Updated.docx
+Report_doc/69_IoT_Project1_Report.docx
+Report_doc/Pyranometer_KMITL_Report.docx
+Report_doc/check_*.py
+Report_doc/generate_block_diagram.py
+
+
+
