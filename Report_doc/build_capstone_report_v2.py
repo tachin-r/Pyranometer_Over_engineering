@@ -1453,18 +1453,18 @@ def create_report_v2():
     add_numbered_item(doc, "1.", "วงจรภาคอ่านสัญญาณได้รับการพิสูจน์การทำงานจริงบน Breadboard และตัวต้นแบบบัดกรีมือเรียบร้อยแล้ว สามารถอ่านสัญญาณ ADC 24 บิตและตอบสนองต่อสเปกตรัมแสงต่างๆ ได้อย่างแม่นยำ พร้อมทั้งค้นพบปัญหา Parasitic Trace Offset และ USB Dropout ซึ่งได้รับการแก้ไขด้วยสวิตชิ่ง 5.2 V", bold_prefix="การพิสูจน์วงจรต้นแบบ: ")
     add_numbered_item(doc, "2.", "ค้นพบปัญหาความไม่เสถียรของ REF5045 อันเนื่องมาจากค่า ESR ของตัวเก็บประจุ และได้วางแผนแก้ปัญหาอย่างถูกต้องโดยการสั่งซื้อ Low-ESR Ceramic Cap (10 µF X7R) เพื่อรักษา Phase Margin ของลูปควบคุมแรงดัน", bold_prefix="การแก้ไขด้านความเสถียร: ")
     add_numbered_item(doc, "3.", "ผลการจำลองทัศนศาสตร์พิสูจน์ชัดเจนว่า BPW 34 ให้การตอบสนองเชิงมุมเหนือกว่า BPX 61 และค้นพบประเด็นความผิดเพี้ยนจากการใส่กระจกหน้าต่าง ซึ่งเป็นที่มาของการออกแบบระเบียบวิธีวิจัยเพื่อนำเข้าทดสอบจริงในห้องปฏิบัติการของคณะวิทยาศาสตร์ในโครงงาน 2", bold_prefix="กรอบการวิจัยทางแสงสู่ Capstone 2: ")
-    add_numbered_item(doc, "4.", "เพื่อขจัดปัญหาความต้านทานแฝงและสัญญาณรบกวนจากการต่อสายลอย คณะผู้จัดทำได้ออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์ (Custom 4-Layer Circular Sensor Head PCB) รุ่น 'V1.1 L1 by Tachin' บนโปรแกรม KiCad 10.0 โดยจัดวางเซนเซอร์ BPX 61 และ RT1 ไว้กึ่งกลาง ร่วมกับ OPA380 TIA, ADS1220 และ REF5045AIDGKR (ตัวถัง VSSOP-8) บนระนาบ Ground Plane เต็มผืน โดยผ่านการตรวจสอบกฎการออกแบบ (DRC) 100% ปราศจากข้อผิดพลาด (0 Violations / 0 Unconnected items) พร้อมส่งผลิตโรงงาน (PCBWay) สำหรับใช้ในการทดลองจริงต่อไป", bold_prefix="การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์ (Custom PCB): ")
+    add_numbered_item(doc, "4.", "เพื่อขจัดปัญหาความต้านทานแฝงและสัญญาณรบกวนจากการต่อสายลอย คณะผู้จัดทำได้ออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์ (Custom 4-Layer Circular Sensor Head PCB) รุ่น 'V1.1 L1 by Tachin' บนโปรแกรม KiCad 10.0 โดยจัดสรรโครงสร้างแบบคู่ขนาน 2 รูปแบบ ได้แก่ รุ่น L1_Analog (สำหรับ BPX 61 ในตัวถัง TO-39 Can) และรุ่น L1_Analog_BPW34 (สำหรับ BPW 34 ในตัวถัง Flat DIL Plastic) ทั้งนี้ จากการตรวจสอบเอกสารข้อมูลทางเทคนิคของ ams OSRAM ยืนยันว่าเซนเซอร์ทั้งสองรุ่นใช้เนื้อชิปซิลิคอน (Active Chip Die) ขนาดเดียวกันเป๊ะ คือ 2.65 × 2.65 mm² (พื้นที่รับแสง 7.02 mm²) จึงมีคุณสมบัติทางไฟฟ้าและสเปกตรัมเท่ากันทุกประการ ทำให้การออกแบบแผ่นวงจรคู่ขนานนี้เป็นการทดลองแบบควบคุมตัวแปร (Controlled Experiment) ที่สมบูรณ์แบบเพื่อเปรียบเทียบผลของตัวถังและหน้าต่างทางทัศนศาสตร์อย่างแท้จริง โดยทั้งสองรุ่นผ่านการตรวจ DRC 100% ไร้ข้อผิดพลาด (0 Violations / 0 Unconnected items) พร้อมส่งผลิตโรงงาน (PCBWay) สำหรับใช้ใน Capstone 2 ต่อไป", bold_prefix="การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์คู่ขนาน (Custom Dual-Variant PCB): ")
 
-    # ภาพเรนเดอร์ 3D PCB V1.1 L1
-    p_pcb_top = os.path.join(img_dir, "pcb_3d_render_top.png")
-    p_pcb_iso = os.path.join(img_dir, "pcb_3d_render_iso.png")
-    if os.path.exists(p_pcb_top) and os.path.exists(p_pcb_iso):
+    # ภาพเรนเดอร์ 3D PCB V1.1 L1 (BPX 61 vs BPW 34)
+    p_bpx = os.path.join(img_dir, "pcb_3d_render_iso.png")
+    p_bpw = os.path.join(img_dir, "pcb_bpw34_3d_render_iso.png")
+    if os.path.exists(p_bpx) and os.path.exists(p_bpw):
         add_two_figure_images_side_by_side(
             doc,
-            p_pcb_top, "(ก) มุมมองด้านบน (Top View)",
-            p_pcb_iso, "(ข) มุมมองจำลอง 3 มิติ (Isometric 3D View)",
+            p_bpx, "(ก) รุ่นที่ 1: ตัวถังโลหะ TO-39 Can (BPX 61)",
+            p_bpw, "(ข) รุ่นที่ 2: ตัวถังพลาสติกแบน Flat DIL (BPW 34)",
             fig_no="3.13",
-            main_title="ภาพจำลอง 3 มิติของแผ่นวงจรพิมพ์ 4 เลเยอร์ (Custom 4-Layer Sensor Head PCB - V1.1 L1 by Tachin)",
+            main_title="ภาพจำลอง 3 มิติของแผ่นวงจรพิมพ์ 4 เลเยอร์คู่ขนาน (Custom 4-Layer PCB: BPX 61 vs BPW 34)",
             col_width_inch=2.85
         )
 

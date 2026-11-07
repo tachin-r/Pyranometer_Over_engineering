@@ -1002,22 +1002,49 @@ def create_presentation():
         r_b.font.color.rgb = C_TEXT_SUB
 
     # =========================================================================
-    # SLIDE 12: Custom 4-Layer PCB Design (V1.1 L1 by Tachin)
+    # SLIDE 12: Dual-Variant Custom 4-Layer PCB Design (BPX 61 vs BPW 34)
     # =========================================================================
     slide12 = prs.slides.add_slide(blank_layout)
     set_slide_background(slide12, C_BG_LIGHT)
-    add_header(slide12, "Hardware Engineering", "การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์ (Custom 4-Layer Sensor Head PCB)",
-               "รุ่น V1.1 L1 by Tachin — ออกแบบตามหลัก Low-Noise Precision Analog บน KiCad 10 และผ่านการตรวจ DRC 100%")
+    add_header(slide12, "Hardware Engineering", "การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์คู่ขนาน (BPX 61 vs. BPW 34)",
+               "ชิปซิลิคอน ams-OSRAM เดียวกัน (2.65 × 2.65 mm²) — เปรียบเทียบผลของตัวถัง TO-39 กับ Flat DIL บน KiCad 10")
     add_footer(slide12, 12)
 
-    # Left: Two 3D Renders (Top View & Isometric View)
-    p_pcb_top = os.path.join(img_dir, "pcb_3d_render_top.png")
-    p_pcb_iso = os.path.join(img_dir, "pcb_3d_render_iso.png")
-    if os.path.exists(p_pcb_top) and os.path.exists(p_pcb_iso):
-        slide12.shapes.add_picture(p_pcb_top, Inches(0.8), Inches(1.75), width=Inches(2.7))
-        slide12.shapes.add_picture(p_pcb_iso, Inches(3.6), Inches(1.75), width=Inches(2.7))
-    elif os.path.exists(p_pcb_iso):
-        slide12.shapes.add_picture(p_pcb_iso, Inches(0.8), Inches(1.75), width=Inches(5.5))
+    # Left: Two 3D Renders (BPX 61 vs BPW 34)
+    p_bpx = os.path.join(img_dir, "pcb_3d_render_iso.png")
+    p_bpw = os.path.join(img_dir, "pcb_bpw34_3d_render_iso.png")
+    if os.path.exists(p_bpx) and os.path.exists(p_bpw):
+        slide12.shapes.add_picture(p_bpx, Inches(0.8), Inches(1.75), width=Inches(2.7))
+        slide12.shapes.add_picture(p_bpw, Inches(3.6), Inches(1.75), width=Inches(2.7))
+        
+        # Sub-captions under renders
+        tb_c1 = slide12.shapes.add_textbox(Inches(0.8), Inches(5.95), Inches(2.7), Inches(0.8))
+        tf_c1 = tb_c1.text_frame
+        tf_c1.word_wrap = True
+        tf_c1.margin_left = tf_c1.margin_right = tf_c1.margin_top = tf_c1.margin_bottom = 0
+        p_c1 = tf_c1.paragraphs[0]
+        p_c1.alignment = PP_ALIGN.CENTER
+        r_c1 = p_c1.add_run()
+        r_c1.text = "แบบที่ 1: BPX 61\n(TO-39 Metal Can, สูง 5mm)"
+        r_c1.font.name = FONT_BODY
+        r_c1.font.size = Pt(9.5)
+        r_c1.font.bold = True
+        r_c1.font.color.rgb = C_BLUE_BRAND
+
+        tb_c2 = slide12.shapes.add_textbox(Inches(3.6), Inches(5.95), Inches(2.7), Inches(0.8))
+        tf_c2 = tb_c2.text_frame
+        tf_c2.word_wrap = True
+        tf_c2.margin_left = tf_c2.margin_right = tf_c2.margin_top = tf_c2.margin_bottom = 0
+        p_c2 = tf_c2.paragraphs[0]
+        p_c2.alignment = PP_ALIGN.CENTER
+        r_c2 = p_c2.add_run()
+        r_c2.text = "แบบที่ 2: BPW 34\n(Flat DIL Plastic, สูง 1.9mm)"
+        r_c2.font.name = FONT_BODY
+        r_c2.font.size = Pt(9.5)
+        r_c2.font.bold = True
+        r_c2.font.color.rgb = C_GREEN_OK
+    elif os.path.exists(p_bpx):
+        slide12.shapes.add_picture(p_bpx, Inches(0.8), Inches(1.75), width=Inches(5.5))
 
     # Right: PCB Architecture Card
     c_pcb = add_card(slide12, 6.5, 1.75, 6.033, 5.0)
@@ -1026,35 +1053,35 @@ def create_presentation():
     tf_pcb.margin_left = tf_pcb.margin_right = tf_pcb.margin_top = tf_pcb.margin_bottom = Inches(0.2)
     p = tf_pcb.paragraphs[0]
     r = p.add_run()
-    r.text = "สถาปัตยกรรมการออกแบบแผ่นวงจรพิมพ์ V1.1 L1"
+    r.text = "การออกแบบฮาร์ดแวร์คู่ขนานเพื่อการทดลองควบคุม"
     r.font.name = FONT_HEAD
-    r.font.size = Pt(13.5)
+    r.font.size = Pt(13)
     r.font.bold = True
     r.font.color.rgb = C_BLUE_BRAND
 
     pts_pcb = [
-        ("โครงสร้างทรงกลมกะทัดรัด (Circular Sensor Head):", 
-         "ออกแบบแผ่นวงจรรูปทรงกลมเพื่อติดตั้งลงในกระบอกสูบตัวเรือนเซนเซอร์วัดรังสีอาทิตย์ได้อย่างสมบูรณ์แบบ ลดขนาดสายเชื่อมต่อภายนอก"),
-        ("ตำแหน่งเซนเซอร์และ RT1 สมดุลกึ่งกลาง (Co-located Sensing):", 
-         "จัดวาง BPX 61 ตรงกึ่งกลางบอร์ด พร้อมวาง RT1 (Thermistor 103AT-2) ประกบชิดผิวเซนเซอร์ เพื่อตรวจวัดอุณหภูมิจริงและทำ Temperature Compensation อย่างแม่นยำ"),
-        ("ยกระดับสู่อุปกรณ์ความเที่ยงตรงสูง (Precision IC Upgrades):", 
-         "ปรับใช้ REF5045AIDGKR ในตัวถัง VSSOP-8 (MSOP-8) ขนาดเล็กพิเศษ ร่วมกับ OPA380 TIA และชิป 24-bit ADC (ADS1220 TSSOP-16) ลดขนาด Loop และสัญญาณรบกวน"),
-        ("สถาปัตยกรรม 4 เลเยอร์ (Continuous Ground Plane):", 
-         "จัดสรร In1.Cu เป็น Solid Ground Plane ไร้รอยตัด ช่วยขจัดปัญหา Ground Bounce, IR Drop (~5-10 mV) และ Stray Inductance ที่เคยพบจากการต่อสาย Point-to-point"),
-        ("พร้อมส่งผลิตโรงงาน (100% DRC Zero Violations):", 
-         "ผ่านการตรวจสอบ Design Rules Check (DRC) บน KiCad 10.0 ครบถ้วน ไร้ข้อผิดพลาด (0 Violations / 0 Unconnected items) พร้อมส่งผลิต (PCBWay/JLCPCB) ใน Capstone 2")
+        ("ชิปซิลิคอนตัวเดียวกัน (Identical ams-OSRAM Die):", 
+         "ทั้ง BPX 61 และ BPW 34 ผลิตโดย ams OSRAM โดยใช้เนื้อชิปซิลิคอนขนาดเดียวกันเป๊ะ คือ 2.65 × 2.65 mm² (พื้นที่รับแสง 7.02 mm²) ทำให้คุณสมบัติทางไฟฟ้าและสเปกตรัมเท่ากันทุกประการ"),
+        ("การทดลองแบบควบคุมตัวแปร (Controlled Experiment):", 
+         "เมื่อเนื้อชิปเหมือนกัน ความแตกต่างทั้งหมดของการทดลองจึงมาจาก 'รูปทรงตัวถังและหน้าต่างทางทัศนศาสตร์' โดยตรง ช่วยพิสูจน์สมมติฐานทางฟิสิกส์ได้อย่างแม่นยำ ไร้ตัวแปรแทรกซ้อน"),
+        ("ลดความสูงตัวถังลงกว่า 60% (Flat Low-Profile Design):", 
+         "ตัวถัง BPW 34 หนาเพียง 1.9 mm (เทียบกับ TO-39 สูงถึง 5 mm) ทำให้บอร์ดตรงกลางแบนราบ สวมโดมกระจายแสง (Diffuser Dome) ได้แนบชิดและกะทัดรัด"),
+        ("ขจัดปัญหาการตัดแสงมุมชัน (Zero Vignetting):", 
+         "บอร์ด BPW 34 ไร้ขอบกระป๋องโลหะบังแสงที่มุม 44° ตอบสนองเชิงมุมได้กว้างเกือบ 180° ตามกฎโคไซน์ สอดคล้องกับมาตรฐาน ISO 9060 Class A"),
+        ("ความพร้อมในการผลิต (100% DRC Zero Violations):", 
+         "ทั้ง 2 โครงการ (L1_Analog และ L1_Analog_BPW34) ผ่านการตรวจสอบ Design Rules Check ครบถ้วน (0 Errors) พร้อมส่งผลิตโรงงาน (PCBWay) สำหรับใช้ใน Capstone 2")
     ]
     for h, b in pts_pcb:
         p_i = tf_pcb.add_paragraph()
-        p_i.space_before = Pt(5)
+        p_i.space_before = Pt(4)
         r_h = p_i.add_run()
         r_h.text = f"• {h}\n"
         r_h.font.bold = True
-        r_h.font.size = Pt(9.8)
+        r_h.font.size = Pt(9.6)
         r_h.font.color.rgb = C_TEXT_MAIN
         r_b = p_i.add_run()
         r_b.text = f"   {b}"
-        r_b.font.size = Pt(9.2)
+        r_b.font.size = Pt(9.0)
         r_b.font.color.rgb = C_TEXT_SUB
 
     # =========================================================================
@@ -1298,7 +1325,7 @@ def create_presentation():
 
     bullets = [
         ("ความสำเร็จด้านฮาร์ดแวร์และซอฟต์แวร์:", "พิสูจน์การทำงานจริงของวงจร AFE 24 บิต บน Breadboard ร่วมกับ REF5045 (4.500 V) และ ESP32-C6 Web Server รายงานข้อมูลได้สำเร็จสมบูรณ์"),
-        ("การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์ (V1.1 L1):", "ออกแบบ Custom 4-Layer PCB สมบูรณ์แบบด้วย KiCad 10.0 ผ่านการตรวจสอบ DRC 100% (Zero Violations) พร้อมส่งผลิตสำหรับ Capstone 2"),
+        ("การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์คู่ขนาน (V1.1 L1):", "ออกแบบ Custom 4-Layer PCB ทั้งรุ่น BPX 61 และ BPW 34 สมบูรณ์แบบด้วย KiCad 10.0 ผ่านการตรวจ DRC 100% (Zero Violations) พร้อมส่งผลิตสำหรับ Capstone 2"),
         ("การค้นพบสำคัญทางทัศนศาสตร์:", "ชี้ชัดว่าตัวถัง TO-39 (BPX 61) มีการตัดแสงรุนแรงที่ 44° และยืนยันว่า BPW 34 ให้การตอบสนองที่สอดคล้องกับมาตรฐาน ISO 9060 Class A มากกว่า"),
         ("ความพร้อมในการทดสอบจริง:", "จัดทำข้อเสนอการทดลองทางทัศนศาสตร์ (Proposed Lab Methodology) ไว้อย่างชัดเจน ทั้งแผนวัดสเปกตรัมและแผนวัดมุมด้วยแท่นหมุน")
     ]
@@ -1356,8 +1383,13 @@ def create_presentation():
     r_ty.font.color.rgb = C_CYAN_LIGHT
 
     out_file = os.path.join(script_dir, "69_IoT_Pyranometer_Capstone1_Slides.pptx")
-    prs.save(out_file)
-    print(f"[OK] PowerPoint Presentation successfully created at: {out_file}")
+    try:
+        prs.save(out_file)
+        print(f"[OK] PowerPoint Presentation successfully created at: {out_file}")
+    except PermissionError:
+        out_file = os.path.join(script_dir, "69_IoT_Pyranometer_Capstone1_Slides_Latest.pptx")
+        prs.save(out_file)
+        print(f"[OK] Main slides file locked by PowerPoint; saved updated presentation to: {out_file}")
     return out_file
 
 if __name__ == "__main__":

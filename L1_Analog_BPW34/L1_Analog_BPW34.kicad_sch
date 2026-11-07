@@ -1234,7 +1234,7 @@
 					(justify left top)
 				)
 			)
-			(property "Value" "BPX_61"
+			(property "Value" "BPW_34"
 				(at 11.43 2.54 0)
 				(show_name yes)
 				(do_not_autoplace no)
@@ -1245,7 +1245,7 @@
 					(justify left top)
 				)
 			)
-			(property "Footprint" "Samacsys:BPX61"
+			(property "Footprint" "Samacsys:BPW34"
 				(at 11.43 -97.46 0)
 				(show_name yes)
 				(do_not_autoplace no)
@@ -5597,7 +5597,7 @@
 				)
 			)
 		)
-		(property "Value" "BPX_61"
+		(property "Value" "BPW_34"
 			(at 136.398 49.53 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5607,7 +5607,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Samacsys:BPX61"
+		(property "Footprint" "Samacsys:BPW34"
 			(at 166.37 46.99 0)
 			(hide yes)
 			(show_name no)
