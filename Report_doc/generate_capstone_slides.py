@@ -781,13 +781,95 @@ def create_presentation():
         r_pt.font.color.rgb = C_TEXT_SUB
 
     # =========================================================================
+    # =========================================================================
+    # SLIDE 8.5: Photodiode Physics & Transimpedance Amplifier (TIA) Theory
+    # =========================================================================
+    slide_tia = prs.slides.add_slide(blank_layout)
+    set_slide_background(slide_tia, C_BG_LIGHT)
+    add_header(slide_tia, "Analog Front-End Theory", "ทฤษฎีโฟโตไดโอดและวงจรขยายกระแสแสง (Photodiode & TIA Theory)",
+               "การวิเคราะห์ฟิสิกส์โหมด Photovoltaic (Zero Bias) และการแปลงกระแสแสง I_photo ด้วย Zero-Drift Op-Amp")
+    add_footer(slide_tia, 9)
+
+    # 2 Big Cards: Left (Photodiode Modes & IV Curve), Right (TIA Architecture & Transfer Function)
+    w_half = 5.65
+    h_body = 5.0
+    
+    # Left Card: Photodiode Physics & IV Curve
+    c_left = add_card(slide_tia, c_lefts[0], 1.75, w_half, h_body)
+    tf_l = c_left.text_frame
+    tf_l.word_wrap = True
+    tf_l.margin_left = tf_l.margin_right = tf_l.margin_top = tf_l.margin_bottom = Inches(0.12)
+    p = tf_l.paragraphs[0]
+    r = p.add_run()
+    r.text = "1. ฟิสิกส์โฟโตไดโอด & การเลือกโหมด Photovoltaic"
+    r.font.name = FONT_HEAD
+    r.font.size = Pt(12)
+    r.font.bold = True
+    r.font.color.rgb = C_BLUE_BRAND
+
+    # Embed IV Curve image
+    iv_img = os.path.join(img_dir, "photodiode_iv_curve.png")
+    if os.path.exists(iv_img):
+        slide_tia.shapes.add_picture(iv_img, Inches(0.95), Inches(2.15), width=Inches(5.4))
+
+    tb_l_pts = slide_tia.shapes.add_textbox(Inches(0.95), Inches(5.1), Inches(5.4), Inches(1.5))
+    tf_lp = tb_l_pts.text_frame
+    tf_lp.word_wrap = True
+    tf_lp.margin_left = tf_lp.margin_right = tf_lp.margin_top = tf_lp.margin_bottom = 0
+    l_bullets = [
+        "Photovoltaic Mode (V_D = 0V): ขั้วไดโอดไม่มีแรงดันตกคร่อม -> กระแส Dark Current เป็นศูนย์ (I_dark = 0 nA)",
+        "ความเป็นเชิงเส้นสมบูรณ์ (High Linearity): กระแส I_photo แปรผันตรงกับความเข้มแสงอาทิตย์ (W/m²) ครอบคลุม 6 Decades",
+        "ตัดปัญหา Dark Current Thermal Drift: โหมด Photoconductive กระแสรั่วจะเบิ้ล 2 เท่าทุกๆ 10°C จึงไม่เหมาะกับงานนี้"
+    ]
+    for b in l_bullets:
+        p_b = tf_lp.add_paragraph()
+        r_b = p_b.add_run()
+        r_b.text = f"• {b}"
+        r_b.font.size = Pt(8.5)
+        r_b.font.color.rgb = C_TEXT_SUB
+
+    # Right Card: TIA Architecture & Zero-Drift Op-Amp
+    c_right = add_card(slide_tia, c_lefts[0] + w_half + 0.35, 1.75, w_half, h_body)
+    tf_r = c_right.text_frame
+    tf_r.word_wrap = True
+    tf_r.margin_left = tf_r.margin_right = tf_r.margin_top = tf_r.margin_bottom = Inches(0.12)
+    p = tf_r.paragraphs[0]
+    r = p.add_run()
+    r.text = "2. สถาปัตยกรรม TIA & Zero-Drift Op-Amp (OPA388)"
+    r.font.name = FONT_HEAD
+    r.font.size = Pt(12)
+    r.font.bold = True
+    r.font.color.rgb = C_BLUE_BRAND
+
+    # Embed TIA Circuit image
+    tia_img = os.path.join(img_dir, "tia_circuit_architecture.png")
+    if os.path.exists(tia_img):
+        slide_tia.shapes.add_picture(tia_img, Inches(6.95), Inches(2.15), width=Inches(5.4))
+
+    tb_r_pts = slide_tia.shapes.add_textbox(Inches(6.95), Inches(5.1), Inches(5.4), Inches(1.5))
+    tf_rp = tb_r_pts.text_frame
+    tf_rp.word_wrap = True
+    tf_rp.margin_left = tf_rp.margin_right = tf_rp.margin_top = tf_rp.margin_bottom = 0
+    r_bullets = [
+        "Virtual Short บังคับ V_D = 0.000V: ขา Inverting ถูกดึงเท่ากับ V_bias ทำให้ขั้วไดโอดเป็น Zero-Bias ตลอดเวลา",
+        "ฟังก์ชันถ่ายโอน: V_out = V_bias + (I_photo × R_TIA) โดย R_TIA = 2.2 kΩ -> Sensitivity = 2.2 mV / μA",
+        "OPA388 Zero-Drift: แรงดัน V_OS ต่ำสุดขีด ±0.25 μV และ Drift เพียง 0.005 μV/°C ป้องกันการเกิด Dark Current ถาวร",
+        "Ultra-low Input Bias Current: I_B = ±30 pA ไม่ก่อกวนสัญญาณกระแสแสงโฟโตเคอร์เรนต์ในย่านไมโครแอมป์"
+    ]
+    for b in r_bullets:
+        p_b = tf_rp.add_paragraph()
+        r_b = p_b.add_run()
+        r_b.text = f"• {b}"
+        r_b.font.size = Pt(8.5)
+        r_b.font.color.rgb = C_TEXT_SUB
+
     # SLIDE 9: 24-bit Analog Front-End (ADS1220 + REF5045)
     # =========================================================================
     slide9 = prs.slides.add_slide(blank_layout)
     set_slide_background(slide9, C_BG_LIGHT)
     add_header(slide9, "24-bit Hardware AFE", "การออกแบบวงจรขยายและแปลงสัญญาณความละเอียดสูง 24 บิต",
                "โครงสร้างไอซี ADS1220, แรงดันอ้างอิงความเที่ยงตรงสูง REF5045 และเทคนิค Pseudo-Differential")
-    add_footer(slide9, 9)
+    add_footer(slide9, 10)
 
     # Left: ADS1220 Block Diagram
     p_ads = os.path.join(img_dir, "ADS1220_diagram.png")
@@ -834,7 +916,7 @@ def create_presentation():
     set_slide_background(slide10, C_BG_LIGHT)
     add_header(slide10, "Thermal Architecture", "สถาปัตยกรรมตรวจวัดอุณหภูมิ 3 จุดเพื่อการชดเชยความร้อน",
                "การแก้ปัญหาค่าสัมประสิทธิ์อุณหภูมิของโฟโตไดโอด (TC_I ≈ +0.18%/K) ด้วยการมอนิเตอร์ความร้อนหลายจุด")
-    add_footer(slide10, 10)
+    add_footer(slide10, 11)
 
     # 3 Cards for 3 Thermal Sensors
     w_th = 3.65
@@ -956,7 +1038,7 @@ def create_presentation():
     set_slide_background(slide11, C_BG_LIGHT)
     add_header(slide11, "Prototyping & Debugging", "การสร้างต้นแบบจริงบน Breadboard และการแก้ปัญหาเชิงวิศวกรรม",
                "การค้นพบทางวิศวกรรมที่สำคัญ 2 ประการจากการทดลองประกอบวงจรจริงในห้องปฏิบัติการ")
-    add_footer(slide11, 11)
+    add_footer(slide11, 12)
 
     # Left: Photo of Real Prototype
     p_bb = os.path.join(img_dir, "power_switching_prototype.jpg")
@@ -1008,7 +1090,7 @@ def create_presentation():
     set_slide_background(slide12, C_BG_LIGHT)
     add_header(slide12, "Hardware Engineering", "การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์คู่ขนาน (BPX 61 vs. BPW 34)",
                "ชิปซิลิคอน ams-OSRAM เดียวกัน (2.65 × 2.65 mm²) — เปรียบเทียบผลของตัวถัง TO-39 กับ Flat DIL บน KiCad 10")
-    add_footer(slide12, 12)
+    add_footer(slide12, 13)
 
     # Left: Two 3D Renders (BPX 61 vs BPW 34)
     p_bpx = os.path.join(img_dir, "pcb_3d_render_iso.png")
@@ -1091,7 +1173,7 @@ def create_presentation():
     set_slide_background(slide13, C_BG_LIGHT)
     add_header(slide13, "Firmware & IoT Platform", "เฟิร์มแวร์ไมโครคอนโทรลเลอร์ ESP32-C6 และระบบ IoT Web Server",
                "การควบคุมบัสสื่อสาร SPI, การเฝ้าระวัง Watchdog และการรายงานข้อมูลสดแบบไร้สายผ่านเครือข่าย Wi-Fi")
-    add_footer(slide13, 13)
+    add_footer(slide13, 14)
 
     # Left: Serial Monitor Output Image
     p_ser = os.path.join(img_dir, "Read value from ardunio.png")
@@ -1138,7 +1220,7 @@ def create_presentation():
     set_slide_background(slide14, C_BG_LIGHT)
     add_header(slide14, "Experimental Results", "ผลการทดสอบการอ่านค่าจริงบน Breadboard ใน 4 สภาวะแสง",
                "การพิสูจน์การตอบสนองเชิงไดนามิกและการตัดทอนออฟเซ็ตด้วยเทคนิค Pseudo-Differential")
-    add_footer(slide14, 14)
+    add_footer(slide14, 15)
 
     # Big Clean Table for Results
     rows = 5
@@ -1233,7 +1315,7 @@ def create_presentation():
     set_slide_background(slide15, C_BG_LIGHT)
     add_header(slide15, "Future Roadmap", "แผนการดำเนินงานระยะถัดไปในโครงงาน 2 (Capstone Project 2)",
                "กรอบระยะเวลาและเป้าหมายการยกระดับความเที่ยงตรงสู่มาตรฐานสากล ISO 9060 Class A")
-    add_footer(slide15, 15)
+    add_footer(slide15, 16)
 
     # 4 Milestone Horizontal Cards
     w_m = 2.75

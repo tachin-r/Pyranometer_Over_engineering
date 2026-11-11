@@ -479,3 +479,26 @@ def add_bullet_p(doc, bold_prefix, text):
     return add_bullet_item(doc, bullet_char="•", text=text, bold_prefix=f"{bold_prefix} ")
 
 print("[OK] Helpers loaded successfully with KMITL standard formatting & TH SarabunPSK XML font support.")
+
+
+def add_equation_box(doc, eq_text, eq_no=""):
+    """
+    จัดรูปแบบสมการคณิตศาสตร์แบบมีหมายเลขกำกับ (KMITL Format)
+    ตรงกลางเป็นสมการ ด้านขวาสุดเป็นหมายเลขสมการ (eq_no)
+    """
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(6)
+    p.paragraph_format.space_after = Pt(6)
+    p.paragraph_format.line_spacing = 1.15
+    
+    # Equation text (Times New Roman or Sarabun italic)
+    r_eq = p.add_run(eq_text)
+    set_font_sarabun(r_eq, size_pt=15, bold=False)
+    r_eq.font.italic = True
+    
+    if eq_no:
+        # Add tab spacing and equation number on right
+        r_tab = p.add_run("   " * 5)
+        r_no = p.add_run(f"({eq_no})")
+        set_font_sarabun(r_no, size_pt=14, bold=True)

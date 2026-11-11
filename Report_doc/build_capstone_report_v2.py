@@ -39,7 +39,8 @@ from helpers import (
     add_figure_image,
     add_two_figure_images_side_by_side,
     add_two_figure_images_stacked,
-    add_photo_placeholder
+    add_photo_placeholder,
+    add_equation_box
 )
 
 def create_report_v2():
@@ -370,9 +371,10 @@ def create_report_v2():
     add_toc_line(doc, "บทที่ 2 ทฤษฎีและงานวิจัยที่เกี่ยวข้อง", "5", is_bold=True)
     add_toc_line(doc, "2.1 มาตรฐานการวัดรังสีดวงอาทิตย์ (ISO 9060:2018)", "5", level=1)
     add_toc_line(doc, "2.2 การวิเคราะห์เปรียบเทียบชิปเซนเซอร์ BPX 61 และ BPW 34", "7", level=1)
-    add_toc_line(doc, "2.3 คุณสมบัติทางแสงของกระจกแซฟไฟร์ (Sapphire Optical Window)", "10", level=1)
-    add_toc_line(doc, "2.4 ไอซีแปลงสัญญาณแอนะล็อกเป็นดิจิทัล 24 บิต (ADS1220)", "12", level=1)
-    add_toc_line(doc, "2.5 แหล่งจ่ายแรงดันอ้างอิงความแม่นยำสูง (REF5045) และข้อกำหนดตัวเก็บประจุ", "14", level=1)
+    add_toc_line(doc, "2.3 ทฤษฎีโฟโตไดโอดและวงจรขยายกระแสแสง (Photodiode & TIA Theory)", "10", level=1)
+    add_toc_line(doc, "2.4 คุณสมบัติทางแสงของกระจกแซฟไฟร์ (Sapphire Optical Window)", "13", level=1)
+    add_toc_line(doc, "2.5 ไอซีแปลงสัญญาณแอนะล็อกเป็นดิจิทัล 24 บิต (ADS1220)", "15", level=1)
+    add_toc_line(doc, "2.6 แหล่งจ่ายแรงดันอ้างอิงความแม่นยำสูง (REF5045) และข้อกำหนดตัวเก็บประจุ", "17", level=1)
     add_toc_line(doc, "บทที่ 3 การออกแบบระบบ การสร้างต้นแบบ การจำลอง และระเบียบวิธีวิจัย", "16", is_bold=True)
     add_toc_line(doc, "3.1 สถาปัตยกรรมระบบวัดและผังวงจรรวม", "16", level=1)
     add_toc_line(doc, "3.2 การสร้างต้นแบบและการทดสอบจริงบน Breadboard", "18", level=1)
@@ -427,9 +429,11 @@ def create_report_v2():
 
     add_toc_line(doc, "รูปที่ 2.1 คุณลักษณะการตอบสนองต่อทิศทาง (Directional Polar Plot) ของ BPX 61", "9")
     add_toc_line(doc, "รูปที่ 2.2 มิติและโครงสร้างกายภาพตัดขวางของตัวถัง TO-39 (BPX 61) เทียบกับ BPW 34", "9")
-    add_toc_line(doc, "รูปที่ 2.3 กราฟการส่องผ่านทางแสงตามทฤษฎีของผลึกแซฟไฟร์ (Sapphire Transmission)", "11")
-    add_toc_line(doc, "รูปที่ 2.4 บล็อกไดอะแกรมโครงสร้างวงจรภายในของไอซี 24-bit ADC (ADS1220)", "13")
-    add_toc_line(doc, "รูปที่ 2.5 วงจรการต่อใช้งาน REF5045 และข้อกำหนดตัวเก็บประจุโหลด Low-ESR", "15")
+    add_toc_line(doc, "รูปที่ 2.3 คุณลักษณะกราฟกระแส-แรงดัน (I-V Curves) ของโฟโตไดโอดและโหมดการทำงาน", "11")
+    add_toc_line(doc, "รูปที่ 2.4 สถาปัตยกรรมวงจรขยายกระแสแสงแบบ Transimpedance Amplifier (TIA) ด้วยไอซี OPA388", "12")
+    add_toc_line(doc, "รูปที่ 2.5 กราฟการส่องผ่านทางแสงตามทฤษฎีของผลึกแซฟไฟร์ (Sapphire Transmission)", "14")
+    add_toc_line(doc, "รูปที่ 2.6 บล็อกไดอะแกรมโครงสร้างวงจรภายในของไอซี 24-bit ADC (ADS1220)", "16")
+    add_toc_line(doc, "รูปที่ 2.7 วงจรการต่อใช้งาน REF5045 และข้อกำหนดตัวเก็บประจุโหลด Low-ESR", "18")
     add_toc_line(doc, "รูปที่ 3.1 บล็อกไดอะแกรมระบบวัดไพราโนมิเตอร์ต้นแบบ", "16")
     add_toc_line(doc, "รูปที่ 3.2 📸 ภาพถ่ายการทดสอบวงจรต้นแบบจริงบน Breadboard", "19")
     add_toc_line(doc, "รูปที่ 3.3 ภาพจำลองโมเดล 3D CAD ส่วนประกอบของเซนเซอร์ BPX 61", "23")
@@ -690,7 +694,149 @@ def create_report_v2():
             instructions="จัดวางภาพเปรียบเทียบมิติตัวถังจาก Datasheet หน้า 9"
         )
 
-    add_section_heading(doc, "2.3", "คุณสมบัติทางแสงของกระจกแซฟไฟร์ (Sapphire Optical Window)")
+    # -------------------------------------------------------------------------
+    # 2.3 ทฤษฎีโฟโตไดโอดและวงจรขยายกระแสแสง (Photodiode & Transimpedance Amplifier Theory)
+    # -------------------------------------------------------------------------
+    add_section_heading(doc, "2.3", "ทฤษฎีโฟโตไดโอดและวงจรขยายกระแสแสง (Photodiode & TIA Theory)")
+    add_thai_body_p(
+        doc,
+        "การตรวจวัดรังสีดวงอาทิตย์ด้วยเซนเซอร์สารกึ่งตัวนำชนิดซิลิคอนโฟโตไดโอด (Silicon Photodiode) "
+        "ต้องอาศัยความเข้าใจเชิงลึกเกี่ยวกับฟิสิกส์ของรอยต่อ p-n ภายใต้สภาวะแสงตกกระทบ และการออกแบบวงจรขยายสัญญาณฝั่งแอนะล็อกฟรอนต์เอนด์ (Analog Front-End: AFE) "
+        "เพื่อให้ระบบมีความเป็นเชิงเส้น (Linearity) สูงสุด และมีสัญญาณรบกวนต่ำที่สุดตามข้อกำหนดของมาตรฐานเครื่องมือวัด"
+    )
+
+    add_subsection_heading(doc, "2.3.1", "ฟิสิกส์ของโฟโตไดโอดและสมการกระแสโฟโตเคอร์เรนต์")
+    add_thai_body_p(
+        doc,
+        "เมื่อโฟตอนของแสงอาทิตย์ที่มีพลังงานสูงกว่าแถบพลังงานต้องห้าม (Bandgap Energy, E_g ≈ 1.12 eV สำหรับซิลิคอน) "
+        "ตกกระทบลงบนชั้นรอยต่อ p-n หรือชั้น Depletion Region จะเกิดการแตกตัวของคู่อิเล็กตรอน-โฮล (Electron-Hole Pairs) "
+        "สนามไฟฟ้าภายในรอยต่อจะทำการแยกพาหะประจุทั้งสองออกจากกัน เกิดเป็นกระแสแสงที่เรียกว่า โฟโตเคอร์เรนต์ (Photocurrent, I_photo) "
+        "ซึ่งมีความสัมพันธ์โดยตรงกับความเข้มรังสีแสงอาทิตย์ (Irradiance, G ในหน่วย W/m²) และค่าความไวสเปกตรัมของไดโอด (Spectral Responsivity, R(λ) ในหน่วย A/W) ดังสมการ:"
+    )
+    add_equation_box(doc, "I_photo = R(λ) · A_active · G", eq_no="2.1")
+    add_thai_body_p(
+        doc,
+        "โดยที่ A_active คือพื้นที่รับแสงของชิปซิลิคอน (สำหรับ BPW 34 และ BPX 61 มีค่าเท่ากันคือ 7.02 mm²) "
+        "และพฤติกรรมกระแส-แรงดันรวมของโฟโตไดโอดสามารถอธิบายได้ด้วยสมการไดโอดของช็อกคลีย์ (Shockley Diode Equation) ภายใต้สภาวะมีแสง:"
+    )
+    add_equation_box(doc, "I_total = I_s · (exp(q·V_D / (η·k_B·T)) - 1) - I_photo", eq_no="2.2")
+    add_thai_body_p(
+        doc,
+        "โดย I_s คือกระแสอิ่มตัวย้อนกลับ (Reverse Saturation Current), q คือประจุของอิเล็กตรอน (1.602 × 10⁻¹⁹ C), "
+        "k_B คือค่าคงที่บ็อลทซ์มัน (1.38 × 10⁻²³ J/K), T คืออุณหภูมิสัมบูรณ์ (Kelvin), V_D คือแรงดันตกคร่อมขั้วไดโอด "
+        "และ η คือค่าสัมประสิทธิ์อุดมคติของไดโอด (Ideality Factor)"
+    )
+
+    add_subsection_heading(doc, "2.3.2", "การเปรียบเทียบโหมด Photovoltaic vs Photoconductive")
+    add_thai_body_p(
+        doc,
+        "จากสมการที่ 2.2 โฟโตไดโอดสามารถจัดวงจรการทำงานได้ 2 โหมดหลักที่มีผลต่อความแม่นยำของไพราโนมิเตอร์อย่างยิ่ง ดังแสดงในรูปที่ 2.3 และตารางที่ 2.3:"
+    )
+
+    # รูปที่ 2.3 IV Curve
+    iv_curve_path = os.path.join(img_dir, "photodiode_iv_curve.png")
+    if os.path.exists(iv_curve_path):
+        add_figure_image(
+            doc,
+            iv_curve_path,
+            fig_no="2.3",
+            title="คุณลักษณะกราฟกระแส-แรงดัน (I-V Curves) ของโฟโตไดโอดและโหมดการทำงาน",
+            width_inches=5.6
+        )
+    else:
+        add_photo_placeholder(
+            doc,
+            fig_no="2.3",
+            title="คุณลักษณะกราฟกระแส-แรงดัน (I-V Curves) ของโฟโตไดโอดและโหมดการทำงาน",
+            description="กราฟแสดงเส้นคุณลักษณะ I-V ภายใต้ความเข้มแสงต่างๆ และการแบ่งย่าน Photovoltaic (V=0V) เทียบกับ Photoconductive (V<0V)",
+            instructions="วางภาพกราฟ I-V Curves"
+        )
+
+    # ตารางที่ 2.3
+    add_table_caption(doc, "2.3", "การเปรียบเทียบข้อดีและข้อจำกัดระหว่างโหมด Photovoltaic และ Photoconductive")
+    t_mode = doc.add_table(rows=6, cols=3)
+    t_mode.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_clean_borders(t_mode, border_color="000000", border_sz="4")
+    mode_headers = ["พารามิเตอร์เปรียบเทียบ", "โหมด Photovoltaic (Zero Bias: V_D = 0V)", "โหมด Photoconductive (Reverse Bias: V_D < 0V)"]
+    for j, h in enumerate(mode_headers):
+        cell = t_mode.cell(0, j)
+        set_cell_shading(cell, "F1F5F9")
+        set_cell_margins(cell, top=60, bottom=60, left=80, right=80)
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r = p.add_run(h)
+        set_font_sarabun(r, size_pt=14, bold=True)
+
+    mode_data = [
+        ["แรงดันตกคร่อมขั้วไดโอด (V_D)", "0.000 V (Virtual Ground)", "ไบแอสย้อนกลับ (-3V ถึง -10V)"],
+        ["กระแสรั่วในความมืด (Dark Current)", "แทบเป็นศูนย์ (I_dark ≈ 0 nA)", "สูง (มีกระแสรั่วระดับ nA ถึง µA)"],
+        ["ความไวต่อการดริฟต์ตามอุณหภูมิ", "ต่ำมาก (อุณหภูมิกระทบเฉพาะ Responsivity)", "สูงมาก (Dark Current เพิ่มขึ้น 2 เท่าทุกๆ 10°C)"],
+        ["ความเป็นเชิงเส้น (Linearity)", "สูงเป็นเลิศ ครอบคลุม 6–7 Decades", "ปานกลาง (มีข้อจำกัดจากกระแสรั่วไหลที่แสงน้อย)"],
+        ["การนำไปใช้งานในโครงงานนี้", "ได้รับคัดเลือกสำหรับระบบวัดแสงอาทิตย์", "ไม่เลือกใช้ เนื่องจากเกิด Error มหาศาลเมื่ออุณหภูมิเปลี่ยน"]
+    ]
+    for i, row in enumerate(mode_data):
+        for j, val in enumerate(row):
+            cell = t_mode.cell(i+1, j)
+            set_cell_margins(cell, top=50, bottom=50, left=80, right=80)
+            p = cell.paragraphs[0]
+            if j == 0:
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            else:
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r = p.add_run(val)
+            set_font_sarabun(r, size_pt=14)
+
+    add_subsection_heading(doc, "2.3.3", "สถาปัตยกรรมวงจรขยายกระแสเป็นแรงดัน (Transimpedance Amplifier: TIA)")
+    add_thai_body_p(
+        doc,
+        "เพื่อบังคับให้โฟโตไดโอดทำงานในโหมด Photovoltaic (V_D = 0V) อย่างสมบูรณ์และแปลงกระแสแสง I_photo ให้อยู่ในรูปแรงดันไฟฟ้า "
+        "จึงจำเป็นต้องใช้วงจรขยายแบบ Transimpedance Amplifier (TIA) ดังแสดงในรูปที่ 2.4 "
+        "โดยออปแอมป์ป้อนกลับแบบลบจะสร้างสภาวะลัดวงจรเสมือน (Virtual Short Circuit) บังคับให้ศักย์ไฟฟ้าที่ขา Inverting (–) "
+        "เท่ากับขา Non-Inverting (+) ซึ่งผูกอยู่กับแรงดันไบแอสอ้างอิง V_bias เสมอ ทำให้แรงดันคร่อมขั้วไดโอดถูกล็อกไว้ที่ 0.000 V ตลอดเวลา"
+    )
+
+    # รูปที่ 2.4 TIA Architecture
+    tia_arch_path = os.path.join(img_dir, "tia_circuit_architecture.png")
+    if os.path.exists(tia_arch_path):
+        add_figure_image(
+            doc,
+            tia_arch_path,
+            fig_no="2.4",
+            title="สถาปัตยกรรมวงจรขยายกระแสแสงแบบ Transimpedance Amplifier (TIA) ด้วยไอซี OPA388",
+            width_inches=5.8
+        )
+    else:
+        add_photo_placeholder(
+            doc,
+            fig_no="2.4",
+            title="สถาปัตยกรรมวงจรขยายกระแสแสงแบบ Transimpedance Amplifier (TIA)",
+            description="ผังวงจร TIA แสดง Virtual Ground, ขั้วต่อโฟโตไดโอด, ตัวต้านทานป้อนกลับ R_TIA และสมการถ่ายโอนแรงดัน",
+            instructions="วางภาพวงจร TIA Architecture"
+        )
+
+    add_thai_body_p(
+        doc,
+        "ฟังก์ชันถ่ายโอนแรงดันเอาต์พุต (Transfer Function) ของวงจร TIA ในโครงงานนี้ กำหนดโดยสมการที่ 2.3:"
+    )
+    add_equation_box(doc, "V_out = V_bias + (I_photo · R_TIA)", eq_no="2.3")
+    add_thai_body_p(
+        doc,
+        "โดยโครงงานนี้เลือกใช้ค่าตัวต้านทานป้อนกลับ R_TIA = 2.2 kΩ (2,200 Ω ความเที่ยงตรงสูง 0.1% อุณหภูมิดริฟต์ต่ำ) "
+        "ส่งผลให้วงจรมีค่า Transimpedance Gain เท่ากับ 2.2 mV ต่อทุกๆ กระแสแสง 1 µA (Sensitivity = 2.2 mV/µA) "
+        "และเมื่อความเข้มรังสีแสงอาทิตย์สูงสุดที่ 1,000 W/m² (คาดการณ์กระแสแสง I_photo ≈ 40–50 µA) "
+        "แรงดันสัญญาณสวิงจะอยู่ที่ประมาณ 88–110 mV เหนือระดับฐาน V_bias ซึ่งสอดรับกับ Dynamic Range ของไอซี 24-bit ADC อย่างสมบูรณ์แบบ"
+    )
+
+    add_subsection_heading(doc, "2.3.4", "เกณฑ์การเลือกออปแอมป์ Zero-Drift (OPA388 / OPA380)")
+    add_thai_body_p(
+        doc,
+        "ประสิทธิภาพความแม่นยำของวงจร TIA ขึ้นอยู่กับคุณสมบัติของไอซีออปแอมป์เป็นหลัก โดยออปแอมป์เกรดทั่วไปไม่สามารถนำมาใช้งานได้ "
+        "เนื่องจากมีพารามิเตอร์ความผิดพร่องสำคัญ 2 ประการ ได้แก่:"
+    )
+    add_bullet_item(doc, bullet_char="•", text="กระแสไบแอสขาเข้า (Input Bias Current, I_B): หากออปแอมป์มีกระแส I_B สูง กระแสดังกล่าวจะไหลผ่าน R_TIA และบวกเข้ากับกระแสแสง I_photo โดยตรง กลายเป็นออฟเซ็ตถาวร ไอซี OPA388 โครงสร้างอินพุตแบบ CMOS มีกระแส I_B ต่ำเป็นพิเศษเพียง ±30 pA (0.00003 µA) จึงไม่มีผลรบกวนสัญญาณแสง")
+    add_bullet_item(doc, bullet_char="•", text="แรงดันออฟเซ็ตขาเข้าและการดริฟต์ (Input Offset Voltage & Drift, V_OS & dV_OS/dT): หากออปแอมป์มีแรงดัน V_OS แรงดันนี้จะไปปรากฏตกคร่อมขั้วของโฟโตไดโอดโดยตรง ทำให้ไดโอดหลุดจากสภาวะ 0V และเกิด Dark Current รั่วไหลตามอุณหภูมิ ไอซี OPA388 ใช้สถาปัตยกรรม Zero-Drift Chopper-Stabilized มี V_OS ต่ำเป็นเลิศเพียง ±0.25 µV และมีค่าความแปรปรวนตามอุณหภูมิเพียง 0.005 µV/°C ทำให้การควบคุมขั้วไดโอดเป็น 0V มีเสถียรภาพสูงสุด")
+
+    add_section_heading(doc, "2.4", "คุณสมบัติทางแสงของกระจกแซฟไฟร์ (Sapphire Optical Window)")
     add_thai_body_p(
         doc,
         "แม้ว่า BPW 34 จะมีข้อดีเรื่องระนาบรับแสงแบนราบ แต่ข้อจำกัดคือตัวถังเป็นพลาสติก Epoxy ใส "
@@ -708,20 +854,20 @@ def create_report_v2():
         add_figure_image(
             doc,
             sapphire_path,
-            fig_no="2.3",
+            fig_no="2.5",
             title="กราฟการส่องผ่านทางแสงตามทฤษฎีของผลึกแซฟไฟร์ (Sapphire Al₂O₃ Transmission Spectrum)",
             width_inches=5.4
         )
     else:
         add_photo_placeholder(
             doc,
-            fig_no="2.3",
+            fig_no="2.5",
             title="กราฟการส่องผ่านทางแสงตามทฤษฎีของผลึกแซฟไฟร์ (Sapphire Transmission Spectrum)",
             description="กราฟแสดงค่าร้อยละการส่องผ่านแสง (% Transmittance) ของกระจกแซฟไฟร์ที่มีค่าเสถียรประมาณ 85–88% ในช่วง 400 ถึง 1,100 nm",
             instructions="วางภาพกราฟ Transmission Curve ของผลึกแซฟไฟร์"
         )
 
-    add_section_heading(doc, "2.4", "ไอซีแปลงสัญญาณแอนะล็อกเป็นดิจิทัล 24 บิต (ADS1220)")
+    add_section_heading(doc, "2.5", "ไอซีแปลงสัญญาณแอนะล็อกเป็นดิจิทัล 24 บิต (ADS1220)")
     add_thai_body_p(
         doc,
         "การตรวจวัดกระแสแสงโฟโตไดโอดที่มีการเปลี่ยนแปลงตั้งแต่ระดับ nA (ในเวลารุ่งเช้า/พลบค่ำ) จนถึงระดับหลายสิบ µA (เวลากลางวัน) "
@@ -736,20 +882,20 @@ def create_report_v2():
         add_figure_image(
             doc,
             ads_diag,
-            fig_no="2.4",
+            fig_no="2.6",
             title="บล็อกไดอะแกรมโครงสร้างวงจรภายในของไอซี 24-bit ADC (ADS1220)",
             width_inches=5.2
         )
     else:
         add_photo_placeholder(
             doc,
-            fig_no="2.4",
+            fig_no="2.6",
             title="บล็อกไดอะแกรมโครงสร้างวงจรภายในของไอซี 24-bit ADC (ADS1220)",
             description="ภาพบล็อกไดอะแกรมแสดง Input MUX, Low-noise PGA, Delta-Sigma Modulator, Digital Filter และ SPI Interface",
             instructions="วางภาพ Functional Block Diagram จาก Datasheet ADS1220"
         )
 
-    add_section_heading(doc, "2.5", "แหล่งจ่ายแรงดันอ้างอิงความแม่นยำสูง (REF5045) และข้อกำหนดตัวเก็บประจุ")
+    add_section_heading(doc, "2.6", "แหล่งจ่ายแรงดันอ้างอิงความแม่นยำสูง (REF5045) และข้อกำหนดตัวเก็บประจุ")
     add_thai_body_p(
         doc,
         "ความเที่ยงตรงของการแปลงสัญญาณแอนะล็อกเป็นดิจิทัลขึ้นอยู่กับเสถียรภาพของแรงดันอ้างอิง (Reference Voltage, V_REF) "
