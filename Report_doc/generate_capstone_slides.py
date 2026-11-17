@@ -6,6 +6,7 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
 
+
 def create_presentation():
     prs = Presentation()
     prs.slide_width = Inches(13.333)
@@ -15,1464 +16,1066 @@ def create_presentation():
     script_dir = os.path.dirname(__file__)
     img_dir = os.path.join(script_dir, "image")
 
-    # Font definitions
-    FONT_HEAD = "Segoe UI"
-    FONT_BODY = "Segoe UI"
     FONT_THAI = "TH SarabunPSK"
+    FONT_HEAD = "Segoe UI"
 
-    # Color Palette
-    C_NAVY_DARK = RGBColor(11, 19, 43)     # #0B132B
-    C_NAVY_SLATE = RGBColor(15, 23, 42)    # #0F172A
-    C_SLATE_CARD = RGBColor(30, 41, 59)    # #1E293B
-    C_TEXT_LIGHT = RGBColor(248, 250, 252) # #F8FAFC
-    C_TEXT_MUTED = RGBColor(148, 163, 184) # #94A3B8
-    C_CYAN_ACCENT = RGBColor(14, 165, 233) # #0EA5E9
-    C_CYAN_LIGHT = RGBColor(56, 189, 248)  # #38BDF8
-    
-    # Light theme colors
-    C_BG_LIGHT = RGBColor(248, 250, 252)   # #F8FAFC
-    C_TEXT_MAIN = RGBColor(15, 23, 42)     # #0F172A
-    C_TEXT_SUB = RGBColor(71, 85, 105)     # #475569
-    C_CARD_BG = RGBColor(255, 255, 255)    # #FFFFFF
-    C_CARD_BORDER = RGBColor(226, 232, 240)# #E2E8F0
-    C_BLUE_BRAND = RGBColor(2, 132, 199)   # #0284C7
-    C_GREEN_OK = RGBColor(16, 185, 129)    # #10B981
-    C_AMBER_WARN = RGBColor(217, 119, 6)   # #D97706
-    C_PURPLE_IOT = RGBColor(124, 58, 237)  # #7C3AED
+    # Clean Minimalist Palette (matching the user's sample PDF)
+    C_WHITE = RGBColor(255, 255, 255)       # #FFFFFF Pure clean white
+    C_DARK_BG = RGBColor(17, 24, 39)        # #111827 Dark navy for closing slide
+    C_BLUE_TAG = RGBColor(2, 132, 199)      # #0284C7 Clean cyan-blue tag/highlight
+    C_ORANGE_TAG = RGBColor(217, 119, 6)    # #D97706 Warm amber-orange tag
+    C_TEXT_BLACK = RGBColor(15, 23, 42)     # #0F172A Bold dark slate/black
+    C_TEXT_BODY = RGBColor(51, 65, 85)      # #334155 Clean readable gray-slate
+    C_TEXT_MUTED = RGBColor(100, 116, 139)  # #64748B Muted caption gray
+    C_CARD_GRAY = RGBColor(248, 250, 252)   # #F8FAFC Soft minimalist card fill
+    C_BORDER_GRAY = RGBColor(226, 232, 240) # #E2E8F0 Subtle 1pt card border
+    C_NAVY_HEADER = RGBColor(15, 23, 42)    # #0F172A Table dark header
+    C_ROW_ALT = RGBColor(241, 245, 249)     # #F1F5F9 Table alternating row
+    C_RED_BG = RGBColor(254, 242, 242)      # #FEF2F2 Soft red alert card
+    C_RED_BORDER = RGBColor(254, 202, 202)  # #FECACA
+    C_RED_TEXT = RGBColor(153, 27, 27)      # #991B1B
+    C_GREEN_BG = RGBColor(240, 253, 244)    # #F0FDF4 Soft green solution card
+    C_GREEN_BORDER = RGBColor(187, 247, 208)# #BBF7D0
+    C_GREEN_TEXT = RGBColor(22, 101, 52)    # #166534
+    C_BLUE_BG = RGBColor(240, 249, 255)     # #F0F9FF Soft blue card
+    C_AMBER_BG = RGBColor(254, 252, 232)    # #FEFCE8 Soft yellow card
 
-    TOTAL_SLIDES = 15
-
-    # -------------------------------------------------------------
-    # Helper Functions
-    # -------------------------------------------------------------
-    def set_slide_background(slide, color):
+    def set_bg(slide, color=C_WHITE):
         bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, prs.slide_width, prs.slide_height)
         bg.fill.solid()
         bg.fill.fore_color.rgb = color
         bg.line.fill.background()
         return bg
 
-    def add_header(slide, category_tag, title_text, subtitle_text=""):
-        # Category Tag Pill
-        pill = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(0.4), Inches(2.6), Inches(0.32))
-        pill.fill.solid()
-        pill.fill.fore_color.rgb = RGBColor(224, 242, 254) # sky 100
-        pill.line.color.rgb = C_BLUE_BRAND
-        pill.line.width = Pt(1)
-        tf_pill = pill.text_frame
-        tf_pill.word_wrap = True
-        tf_pill.margin_left = tf_pill.margin_right = tf_pill.margin_top = tf_pill.margin_bottom = 0
-        p_pill = tf_pill.paragraphs[0]
-        p_pill.alignment = PP_ALIGN.CENTER
-        r_pill = p_pill.add_run()
-        r_pill.text = category_tag.upper()
-        r_pill.font.name = FONT_HEAD
-        r_pill.font.size = Pt(10)
-        r_pill.font.bold = True
-        r_pill.font.color.rgb = C_BLUE_BRAND
-
-        # Title & Subtitle text box
-        tb = slide.shapes.add_textbox(Inches(0.8), Inches(0.75), Inches(11.7), Inches(0.9))
+    def add_clean_header(slide, tag_text, title_text, subtitle_text="", tag_color=C_BLUE_TAG):
+        tb = slide.shapes.add_textbox(Inches(0.85), Inches(0.55), Inches(11.6), Inches(1.35))
         tf = tb.text_frame
         tf.word_wrap = True
         tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
-        
-        p_title = tf.paragraphs[0]
-        p_title.space_after = Pt(2)
+
+        p_tag = tf.paragraphs[0]
+        p_tag.space_after = Pt(2)
+        r_tag = p_tag.add_run()
+        r_tag.text = tag_text
+        r_tag.font.name = FONT_THAI
+        r_tag.font.size = Pt(18)
+        r_tag.font.bold = True
+        r_tag.font.color.rgb = tag_color
+
+        p_title = tf.add_paragraph()
+        p_title.space_after = Pt(4)
         r_title = p_title.add_run()
         r_title.text = title_text
-        r_title.font.name = FONT_HEAD
-        r_title.font.size = Pt(22)
+        r_title.font.name = FONT_THAI
+        r_title.font.size = Pt(34)
         r_title.font.bold = True
-        r_title.font.color.rgb = C_TEXT_MAIN
+        r_title.font.color.rgb = C_TEXT_BLACK
 
         if subtitle_text:
             p_sub = tf.add_paragraph()
             r_sub = p_sub.add_run()
             r_sub.text = subtitle_text
-            r_sub.font.name = FONT_BODY
-            r_sub.font.size = Pt(12)
-            r_sub.font.color.rgb = C_TEXT_SUB
+            r_sub.font.name = FONT_THAI
+            r_sub.font.size = Pt(18)
+            r_sub.font.color.rgb = C_TEXT_BODY
 
-    def add_footer(slide, current_slide):
-        # Line
-        line = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(7.0), Inches(11.733), Inches(0.02))
-        line.fill.solid()
-        line.fill.fore_color.rgb = RGBColor(226, 232, 240)
-        line.line.fill.background()
-
-        # Footer Text
-        tb = slide.shapes.add_textbox(Inches(0.8), Inches(7.05), Inches(10.0), Inches(0.3))
-        tf = tb.text_frame
-        tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
-        p = tf.paragraphs[0]
-        r = p.add_run()
-        r.text = "Capstone Project 1 | High-Precision Solar Pyranometer | Dual Degree IoT & Industrial Physics, KMITL"
-        r.font.name = FONT_BODY
-        r.font.size = Pt(9.5)
-        r.font.color.rgb = RGBColor(148, 163, 184)
-
-        # Page Number
-        tb_num = slide.shapes.add_textbox(Inches(11.0), Inches(7.05), Inches(1.533), Inches(0.3))
-        tf_num = tb_num.text_frame
-        tf_num.margin_left = tf_num.margin_right = tf_num.margin_top = tf_num.margin_bottom = 0
-        p_num = tf_num.paragraphs[0]
-        p_num.alignment = PP_ALIGN.RIGHT
-        r_num = p_num.add_run()
-        r_num.text = f"{current_slide} / {TOTAL_SLIDES}"
-        r_num.font.name = FONT_BODY
-        r_num.font.size = Pt(9.5)
-        r_num.font.bold = True
-        r_num.font.color.rgb = C_BLUE_BRAND
-
-    def add_card(slide, left, top, width, height, bg_rgb=C_CARD_BG, border_rgb=C_CARD_BORDER, border_pt=1):
-        card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(left), Inches(top), Inches(width), Inches(height))
+    def add_card(slide, left, top, width, height, bg_rgb=C_CARD_GRAY, border_rgb=C_BORDER_GRAY, border_pt=1):
+        card = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            Inches(left), Inches(top), Inches(width), Inches(height)
+        )
         card.fill.solid()
         card.fill.fore_color.rgb = bg_rgb
-        card.line.color.rgb = border_rgb
-        card.line.width = Pt(border_pt)
+        if border_rgb is not None and border_pt > 0:
+            card.line.color.rgb = border_rgb
+            card.line.width = Pt(border_pt)
+        else:
+            card.line.fill.background()
         return card
 
-    # =========================================================================
-    # SLIDE 1: Title Slide (Dark Theme / Executive High Impact)
-    # =========================================================================
-    slide1 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide1, C_NAVY_DARK)
-
-    # Accent decorative glow bar
-    bar = slide1.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(0.8), Inches(0.15), Inches(4.0))
-    bar.fill.solid()
-    bar.fill.fore_color.rgb = C_CYAN_ACCENT
-    bar.line.fill.background()
-
-    # Title box
-    tb_t = slide1.shapes.add_textbox(Inches(1.2), Inches(0.7), Inches(11.3), Inches(3.6))
-    tf_t = tb_t.text_frame
-    tf_t.word_wrap = True
-
-    p_badge = tf_t.paragraphs[0]
-    p_badge.space_after = Pt(8)
-    r_b = p_badge.add_run()
-    r_b.text = "CAPSTONE PROJECT 1 PROPOSAL & PROGRESS REPORT (2026)"
-    r_b.font.name = FONT_HEAD
-    r_b.font.size = Pt(11)
-    r_b.font.bold = True
-    r_b.font.color.rgb = C_CYAN_LIGHT
-
-    p_th = tf_t.add_paragraph()
-    p_th.space_after = Pt(6)
-    r_th = p_th.add_run()
-    r_th.text = "การพัฒนาระบบวัดการแผ่รังสีแสงอาทิตย์ความแม่นยำสูง"
-    r_th.font.name = FONT_HEAD
-    r_th.font.size = Pt(28)
-    r_th.font.bold = True
-    r_th.font.color.rgb = C_TEXT_LIGHT
-
-    p_en = tf_t.add_paragraph()
-    p_en.space_after = Pt(12)
-    r_en = p_en.add_run()
-    r_en.text = "Development of High-Precision Solar Pyranometer"
-    r_en.font.name = FONT_HEAD
-    r_en.font.size = Pt(21)
-    r_en.font.bold = True
-    r_en.font.color.rgb = C_CYAN_ACCENT
-
-    p_sub = tf_t.add_paragraph()
-    r_sub = p_sub.add_run()
-    r_sub.text = "Dual Degree: B.Eng (IoT System & Information Engineering) & B.Sc. (Industrial Physics)\nFaculty of Engineering & Faculty of Science, King Mongkut's Institute of Technology Ladkrabang"
-    r_sub.font.name = FONT_BODY
-    r_sub.font.size = Pt(12)
-    r_sub.font.color.rgb = C_TEXT_MUTED
-
-    # Student Cards (3 Columns)
-    st_lefts = [1.2, 5.0, 8.8]
-    st_names = [
-        ("นายเตชินท์ รัฐวงษา", "รหัสนักศึกษา 66010296", "MR. TECHIN RATTAWONGSA"),
-        ("นายณัฐพัชร์ รัตนนวงศ์", "รหัสนักศึกษา 66010256", "MR. NATTAPAT RATANANWONG"),
-        ("นายพีรวิช เฉลิมเกียรติ", "รหัสนักศึกษา 66010591", "MR. PEERAWICH CHALOEMKIAT")
-    ]
-    for idx, (th_n, sid, en_n) in enumerate(st_names):
-        c_st = add_card(slide1, st_lefts[idx], 4.7, 3.5, 1.2, bg_rgb=C_SLATE_CARD, border_rgb=RGBColor(51, 65, 85))
-        tf_sc = c_st.text_frame
-        tf_sc.word_wrap = True
-        tf_sc.margin_left = tf_sc.margin_right = tf_sc.margin_top = tf_sc.margin_bottom = Inches(0.12)
-        p1 = tf_sc.paragraphs[0]
-        r1 = p1.add_run()
-        r1.text = th_n
-        r1.font.name = FONT_HEAD
-        r1.font.size = Pt(12)
-        r1.font.bold = True
-        r1.font.color.rgb = C_TEXT_LIGHT
-        
-        p2 = tf_sc.add_paragraph()
-        r2 = p2.add_run()
-        r2.text = sid
-        r2.font.name = FONT_BODY
-        r2.font.size = Pt(10.5)
-        r2.font.color.rgb = C_CYAN_LIGHT
-
-        p3 = tf_sc.add_paragraph()
-        r3 = p3.add_run()
-        r3.text = en_n
-        r3.font.name = FONT_BODY
-        r3.font.size = Pt(9)
-        r3.font.color.rgb = C_TEXT_MUTED
-
-    # Advisor Bar
-    c_adv = add_card(slide1, 1.2, 6.05, 11.1, 0.95, bg_rgb=RGBColor(15, 23, 42), border_rgb=RGBColor(51, 65, 85))
-    tf_adv = c_adv.text_frame
-    tf_adv.word_wrap = True
-    tf_adv.margin_left = tf_adv.margin_right = tf_adv.margin_top = tf_adv.margin_bottom = Inches(0.12)
-    p_a1 = tf_adv.paragraphs[0]
-    r_a1 = p_a1.add_run()
-    r_a1.text = "อาจารย์ที่ปรึกษาโครงงาน (Project Advisors):  "
-    r_a1.font.name = FONT_HEAD
-    r_a1.font.size = Pt(11)
-    r_a1.font.bold = True
-    r_a1.font.color.rgb = C_CYAN_LIGHT
-
-    r_a2 = p_a1.add_run()
-    r_a2.text = "ผศ.ดร.ธนวิชญ์ อนวงค์พินิจ "
-    r_a2.font.name = FONT_HEAD
-    r_a2.font.size = Pt(11)
-    r_a2.font.bold = True
-    r_a2.font.color.rgb = C_TEXT_LIGHT
-    r_a2_sub = p_a1.add_run()
-    r_a2_sub.text = "(ที่ปรึกษาหลัก - วศ.บ. ระบบไอโอทีและสารสนเทศ)    |    "
-    r_a2_sub.font.size = Pt(9.5)
-    r_a2_sub.font.color.rgb = C_TEXT_MUTED
-
-    r_a3 = p_a1.add_run()
-    r_a3.text = "ผศ.ดร.ประธาน บูรณศิริ "
-    r_a3.font.name = FONT_HEAD
-    r_a3.font.size = Pt(11)
-    r_a3.font.bold = True
-    r_a3.font.color.rgb = C_TEXT_LIGHT
-    r_a3_sub = p_a1.add_run()
-    r_a3_sub.text = "(ที่ปรึกษาร่วม - วท.บ. ฟิสิกส์อุตสาหกรรม, ผู้เชี่ยวชาญทัศนศาสตร์)"
-    r_a3_sub.font.size = Pt(9.5)
-    r_a3_sub.font.color.rgb = C_TEXT_MUTED
+    def add_pic_safe(slide, path, left, top, width=None, height=None):
+        if os.path.exists(path):
+            kwargs = {}
+            if width is not None:
+                kwargs["width"] = Inches(width)
+            if height is not None:
+                kwargs["height"] = Inches(height)
+            return slide.shapes.add_picture(path, Inches(left), Inches(top), **kwargs)
+        return None
 
     # =========================================================================
-    # SLIDE 2: Background & Problem Statement
+    # SLIDE 1: Clean Title Slide
     # =========================================================================
-    slide2 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide2, C_BG_LIGHT)
-    add_header(slide2, "Project Motivation", "ความเป็นมา ความสำคัญ และปัญหาของระบบวัดแสงอาทิตย์", 
-               "ทำไมต้องวิจัยและพัฒนาระบบวัดรังสีแสงอาทิตย์ความแม่นยำสูง (Solar Pyranometer) ขึ้นเอง?")
-    add_footer(slide2, 2)
+    s1 = prs.slides.add_slide(blank_layout)
+    set_bg(s1, C_WHITE)
 
-    # 3 Cards Layout
-    w_card = 3.65
-    h_card = 5.0
-    c_lefts = [0.8, 4.84, 8.88]
-
-    # Card 1: ความสำคัญ
-    c1 = add_card(slide2, c_lefts[0], 1.75, w_card, h_card)
-    tf1 = c1.text_frame
+    tb1 = s1.shapes.add_textbox(Inches(0.85), Inches(0.65), Inches(11.6), Inches(1.6))
+    tf1 = tb1.text_frame
     tf1.word_wrap = True
-    tf1.margin_left = tf1.margin_right = tf1.margin_top = tf1.margin_bottom = Inches(0.2)
-    p = tf1.paragraphs[0]
+    p1 = tf1.paragraphs[0]
+    p1.alignment = PP_ALIGN.CENTER
+    r1 = p1.add_run()
+    r1.text = "Development of High-Precision Solar Pyranometer"
+    r1.font.name = FONT_HEAD
+    r1.font.size = Pt(34)
+    r1.font.bold = True
+    r1.font.color.rgb = C_BLUE_TAG
+
+    p1_sub = tf1.add_paragraph()
+    p1_sub.alignment = PP_ALIGN.CENTER
+    p1_sub.space_before = Pt(6)
+    r1_sub = p1_sub.add_run()
+    r1_sub.text = "การพัฒนาระบบวัดการแผ่รังสีแสงอาทิตย์ความแม่นยำสูง (Capstone Project 1)"
+    r1_sub.font.name = FONT_THAI
+    r1_sub.font.size = Pt(24)
+    r1_sub.font.bold = True
+    r1_sub.font.color.rgb = C_TEXT_BLACK
+
+    # Center Hero Visuals (Perfboard Prototype + 3D Case + 4-Layer PCB)
+    p_hero1 = os.path.join(img_dir, "perfboard_top_view.jpg")
+    p_hero2 = os.path.join(img_dir, "cad_perfboard_case_assy.png")
+    p_hero3 = os.path.join(img_dir, "pcb_bpw34_3d_render_iso.png")
+    add_pic_safe(s1, p_hero1, 1.15, 2.25, height=3.3)
+    add_pic_safe(s1, p_hero2, 5.15, 2.25, height=3.3)
+    add_pic_safe(s1, p_hero3, 8.95, 2.25, height=3.3)
+
+    tb1_f = s1.shapes.add_textbox(Inches(0.85), Inches(5.85), Inches(11.6), Inches(1.2))
+    tf1_f = tb1_f.text_frame
+    tf1_f.word_wrap = True
+    pf1 = tf1_f.paragraphs[0]
+    pf1.alignment = PP_ALIGN.CENTER
+    rf1 = pf1.add_run()
+    rf1.text = "นายเตชินท์ รัฐวงษา (66010296)  •  นายณัฐพัชร์ รัตนนวงศ์ (66010256)  •  นายพีรวิช เฉลิมเกียรติ (66010591)"
+    rf1.font.name = FONT_THAI
+    rf1.font.size = Pt(20)
+    rf1.font.bold = True
+    rf1.font.color.rgb = C_TEXT_BLACK
+
+    pf2 = tf1_f.add_paragraph()
+    pf2.alignment = PP_ALIGN.CENTER
+    rf2 = pf2.add_run()
+    rf2.text = "อาจารย์ที่ปรึกษา: ผศ.ดร.ธนวิชญ์ อนุวงศ์พินิจ (วิศวกรรมไอโอทีและสารสนเทศ) และ ผศ.ดร.ประธาน บูรณศิริ (ฟิสิกส์อุตสาหกรรม)"
+    rf2.font.name = FONT_THAI
+    rf2.font.size = Pt(17)
+    rf2.font.color.rgb = C_TEXT_MUTED
+
+    # =========================================================================
+    # SLIDE 2: ความสำคัญในอุตสาหกรรมพลังงานแสงอาทิตย์
+    # =========================================================================
+    s2 = prs.slides.add_slide(blank_layout)
+    set_bg(s2, C_WHITE)
+    add_clean_header(s2, "ความสำคัญ", "ในอุตสาหกรรมพลังงานแสงอาทิตย์")
+
+    c2_l = add_card(s2, 0.85, 2.0, 4.5, 4.6, bg_rgb=C_BLUE_BG, border_rgb=None)
+    tf2_l = c2_l.text_frame
+    tf2_l.word_wrap = True
+    tf2_l.margin_left = tf2_l.margin_right = tf2_l.margin_top = Inches(0.3)
+    p = tf2_l.paragraphs[0]
     r = p.add_run()
-    r.text = "ความสำคัญในอุตสาหกรรม\nพลังงานแสงอาทิตย์"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(14)
+    r.text = "Global Horizontal Irradiance (GHI)"
+    r.font.name = FONT_THAI
+    r.font.size = Pt(24)
     r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
+    r.font.color.rgb = C_BLUE_TAG
 
-    pts1 = [
-        ("การประเมิน Performance Ratio (PR):", "จำเป็นต้องใช้ค่าความเข้มแสงอาทิตย์ (Irradiance: W/m²) ที่แม่นยำเพื่อชี้วัดประสิทธิภาพโรงไฟฟ้า PV"),
-        ("มาตรฐานสากล ISO 9060:2018:", "แบ่งชั้นคุณภาพเป็น Class A (Spectrally Flat), Class B และ Class C ซึ่งควบคุม Directional & Spectral Error อย่างเข้มงวด"),
-        ("ความต้องการในระบบ Smart Grid:", "ต้องมีอัตราการตอบสนองเร็ว (Fast Response Time) เพื่อตรวจจับเมฆบดบังแสงชั่วขณะ (Cloud Transients)")
+    p_eq = tf2_l.add_paragraph()
+    p_eq.space_before = Pt(14)
+    r_eq = p_eq.add_run()
+    r_eq.text = "PR = E_actual / (G_GHI × A_PV × η_STC)"
+    r_eq.font.name = FONT_HEAD
+    r_eq.font.size = Pt(16)
+    r_eq.font.bold = True
+    r_eq.font.color.rgb = C_TEXT_BLACK
+
+    p_desc = tf2_l.add_paragraph()
+    p_desc.space_before = Pt(14)
+    r_desc = p_desc.add_run()
+    r_desc.text = (
+        "ไพราโนมิเตอร์ทำหน้าที่เสมือน 'ไม้บรรทัดมาตรฐานทางแสง' "
+        "ในการตรวจวัดพลังงานแสงอาทิตย์ตกกระทบจริง (W/m²) "
+        "เพื่อประเมินสุขภาพและประสิทธิภาพของโรงไฟฟ้าโซลาร์เซลล์"
+    )
+    r_desc.font.name = FONT_THAI
+    r_desc.font.size = Pt(19)
+    r_desc.font.color.rgb = C_TEXT_BODY
+
+    tb2_r = s2.shapes.add_textbox(Inches(5.75), Inches(2.0), Inches(6.8), Inches(4.8))
+    tf2_r = tb2_r.text_frame
+    tf2_r.word_wrap = True
+    bullets_s2 = [
+        (
+            "คำนวณอัตราส่วนประสิทธิภาพของระบบ (Performance Ratio - PR): ",
+            "นำค่าความเข้มของแสงที่วัดได้จาก Pyranometer มาเปรียบเทียบกับกำลังไฟฟ้าจริงที่ผลิตได้จาก Inverter เพื่อดูว่าโรงไฟฟ้าทำงานได้เต็มประสิทธิภาพหรือไม่"
+        ),
+        (
+            "ตรวจหาความผิดปกติของระบบและแผงโซลาร์เซลล์: ",
+            "หากแสงแดดมีความเข้มสูง แต่กระแสไฟฟ้าที่ผลิตได้กลับต่ำกว่าปกติ จะช่วยให้ผู้ดูแลทราบทันทีว่ามีปัญหา เช่น แผงโซลาร์สกปรก มีฝุ่นสะสม มีเงาบัง หรือแผงเสื่อมสภาพ"
+        ),
+        (
+            "ใช้เป็นเกณฑ์ตรวจสอบสัญญาและประกันการผลิตไฟฟ้า: ",
+            "ข้อมูลจาก Pyranometer ทำหน้าที่เป็นหลักฐานอ้างอิงทางวิศวกรรมระหว่างเจ้าของโครงการ ผู้รับเหมาติดตั้ง (EPC) หรือการซื้อขายไฟฟ้า"
+        )
     ]
-    for h, b in pts1:
-        p_h = tf1.add_paragraph()
-        p_h.space_before = Pt(8)
-        r_h = p_h.add_run()
-        r_h.text = f"• {h} "
-        r_h.font.bold = True
-        r_h.font.size = Pt(11)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_h.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(10)
-        r_b.font.color.rgb = C_TEXT_SUB
+    for idx, (b_head, b_body) in enumerate(bullets_s2):
+        p = tf2_r.paragraphs[0] if idx == 0 else tf2_r.add_paragraph()
+        p.space_after = Pt(16)
+        rh = p.add_run()
+        rh.text = "• " + b_head
+        rh.font.name = FONT_THAI
+        rh.font.size = Pt(21)
+        rh.font.bold = True
+        rh.font.color.rgb = C_TEXT_BLACK
+        rb = p.add_run()
+        rb.text = b_body
+        rb.font.name = FONT_THAI
+        rb.font.size = Pt(20)
+        rb.font.color.rgb = C_TEXT_BODY
 
-    # Card 2: ข้อจำกัดอุปกรณ์ในตลาด
-    c2 = add_card(slide2, c_lefts[1], 1.75, w_card, h_card, bg_rgb=RGBColor(254, 242, 242), border_rgb=RGBColor(254, 202, 202))
-    tf2 = c2.text_frame
-    tf2.word_wrap = True
-    tf2.margin_left = tf2.margin_right = tf2.margin_top = tf2.margin_bottom = Inches(0.2)
-    p = tf2.paragraphs[0]
-    r = p.add_run()
-    r.text = "ข้อจำกัดของอุปกรณ์\nในท้องตลาดปัจจุบัน"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(14)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor(220, 38, 38) # red
+    # =========================================================================
+    # SLIDE 3: ตารางมาตรฐาน ISO 9060:2018
+    # =========================================================================
+    s3 = prs.slides.add_slide(blank_layout)
+    set_bg(s3, C_WHITE)
+    add_clean_header(s3, "มาตรฐานสากล", "เกณฑ์การจำแนกประเภท Pyranometer ตามมาตรฐาน ISO 9060:2018")
 
-    pts2 = [
-        ("Thermopile Pyranometer (Class A):", "ราคาสูงมาก (100,000 - 350,000+ บาท), ตอบสนองช้า (5-30 วินาที), มีปัญหา Thermal Zero Offset A/B เมื่อท้องฟ้าโปร่ง"),
-        ("Silicon Pyranometer ทั่วไป (< 10,000 บ.):", "เกิด Cosine Error รุนแรงที่มุมชัน, สเปกตรัมแคบ และมี Thermal Drift สูงตามอุณหภูมิแวดล้อม (+0.18%/K)"),
-        ("ช่องว่างทางเทคโนโลยี (The Gap):", "ยังไม่มีอุปกรณ์ที่รวมความเร็วของโฟโตไดโอด เข้ากับความแม่นยำระดับ Class A ในราคาประหยัด")
+    rows_s3 = [
+        ["พารามิเตอร์สมรรถนะ", "Class A (ระดับสูงสุด)", "Class B", "Class C", "เป้าหมายโครงงานนี้"],
+        ["พิกัดความเข้มแสงสูงสุด (Max Irradiance)", "2,000 – 4,000 W/m²", "2,000 W/m²", "1,500 W/m²", "ปรับได้ถึง 4,000 W/m²"],
+        ["เวลาการตอบสนอง (Response Time, 95%)", "< 0.5 s (Fast Response)", "< 10 s", "< 20 s", "< 0.05 s (Photodiode)"],
+        ["การเลื่อนวนจากอุณหภูมิ (Temperature Drift)", "< ±1%", "< ±2%", "< ±4%", "ชดเชยด้วย NTC + สมการ"],
+        ["ความไม่เป็นเชิงเส้น (Non-linearity)", "< ±0.2%", "< ±0.5%", "< ±1.0%", "คง Vbias ป้องกันอิ่มตัว"],
+        ["ความคลาดเคลื่อนเชิงมุม (Cosine Error)", "< ±10 W/m²", "< ±20 W/m²", "< ±30 W/m²", "ใช้ตัวถังแบน BPW 34"]
     ]
-    for h, b in pts2:
-        p_h = tf2.add_paragraph()
-        p_h.space_before = Pt(8)
-        r_h = p_h.add_run()
-        r_h.text = f"• {h} "
-        r_h.font.bold = True
-        r_h.font.size = Pt(11)
-        r_h.font.color.rgb = RGBColor(185, 28, 28)
-        r_b = p_h.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(10)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # Card 3: วิสัยทัศน์โครงการ
-    c3 = add_card(slide2, c_lefts[2], 1.75, w_card, h_card, bg_rgb=RGBColor(240, 253, 244), border_rgb=RGBColor(187, 247, 208))
-    tf3 = c3.text_frame
-    tf3.word_wrap = True
-    tf3.margin_left = tf3.margin_right = tf3.margin_top = tf3.margin_bottom = Inches(0.2)
-    p = tf3.paragraphs[0]
-    r = p.add_run()
-    r.text = "เป้าหมายและแนวทางนวัตกรรม\nของโครงงานนี้"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(14)
-    r.font.bold = True
-    r.font.color.rgb = C_GREEN_OK
-
-    pts3 = [
-        ("การบูรณาการหลักสูตรสองปริญญา:", "ผสานองค์ความรู้ด้าน Optical Physics (การสะท้อน, การหักเห, กฎโคไซน์) เข้ากับ IoT & 24-bit Embedded Engineering"),
-        ("การชดเชยอุณหภูมิหลายจุด (Multi-Point):", "ตรวจวัดอุณหภูมิผิวเซนเซอร์และตัวแปลงสัญญาณเพื่อชดเชยค่าความไวทางความร้อนในแบบเรียลไทม์"),
-        ("ต้นแบบต้นทุนต่ำแต่เที่ยงตรงสูง:", "ใช้อุปกรณ์มาตรฐานที่มีจำหน่ายทั่วไป สร้างระบบความแม่นยำสูงในงบประมาณวัสดุต้นแบบไม่เกิน 10,000 บาท")
-    ]
-    for h, b in pts3:
-        p_h = tf3.add_paragraph()
-        p_h.space_before = Pt(8)
-        r_h = p_h.add_run()
-        r_h.text = f"• {h} "
-        r_h.font.bold = True
-        r_h.font.size = Pt(11)
-        r_h.font.color.rgb = RGBColor(21, 128, 61)
-        r_b = p_h.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(10)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 3: Scope & Phased Roadmap (Capstone 1 vs Capstone 2)
-    # =========================================================================
-    slide3 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide3, C_BG_LIGHT)
-    add_header(slide3, "Project Scope & Roadmap", "ขอบเขตการดำเนินงานโครงงาน 1 และแผนพัฒนาโครงงาน 2",
-               "การแบ่งเป้าหมายการดำเนินงานตามกรอบระยะเวลาของหลักสูตรอย่างเป็นรูปธรรม")
-    add_footer(slide3, 3)
-
-    # 2 Big Cards: Capstone 1 (Done) vs Capstone 2 (Next)
-    w_half = 5.7
-    h_body = 5.0
-
-    # Left: Capstone 1
-    c_p1 = add_card(slide3, 0.8, 1.75, w_half, h_body, bg_rgb=RGBColor(240, 249, 255), border_rgb=C_BLUE_BRAND, border_pt=2)
-    tf_p1 = c_p1.text_frame
-    tf_p1.word_wrap = True
-    tf_p1.margin_left = tf_p1.margin_right = tf_p1.margin_top = tf_p1.margin_bottom = Inches(0.25)
-    
-    p = tf_p1.paragraphs[0]
-    r = p.add_run()
-    r.text = "Capstone Project 1 (ผลงานที่สำเร็จในปัจจุบัน)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(15)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    items_p1 = [
-        ("การจำลองทางทัศนศาสตร์ (Optical Simulation):", "สร้างโมเดล 3D CAD และจำลอง Ray-tracing เปรียบเทียบ BPW 34 vs BPX 61 จนค้นพบปัญหาการตัดแสงของกระจกหน้าต่างตัวถัง TO-39"),
-        ("การออกแบบและต่อวงจรทดสอบ AFE บน Breadboard:", "สร้างวงจร 24-bit ADC (ADS1220) ร่วมกับ REF5045 (4.500 V) และ OPA380 TIA"),
-        ("การแก้ปัญหา High-Z Leakage และ USB Dropout:", "แก้กระแสรั่วขา Trim ด้วยการ DNP และปรับมาใช้สวิตชิ่ง 5.2V เพื่อก้าวข้าม Dropout"),
-        ("ระบบประมวลผลและ IoT Web Dashboard:", "พัฒนาเฟิร์มแวร์ ESP32-C6 สื่อสาร SPI 1MHz, ตรวจจับ Watchdog DRDY และแสดงผลสดผ่าน Web Server"),
-        ("การจัดทำข้อเสนอการทดลองทางทัศนศาสตร์ (Lab Proposal):", "ร่างระเบียบวิธีทดสอบจริงด้วยเครื่อง Vernier LabQuest 2 และแท่นหมุน Goniometer")
-    ]
-    for h, b in items_p1:
-        p_i = tf_p1.add_paragraph()
-        p_i.space_before = Pt(8)
-        r_h = p_i.add_run()
-        r_h.text = f"✔ {h}\n"
-        r_h.font.bold = True
-        r_h.font.size = Pt(11)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_i.add_run()
-        r_b.text = f"   {b}"
-        r_b.font.size = Pt(10)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # Right: Capstone 2
-    c_p2 = add_card(slide3, 6.83, 1.75, w_half, h_body, bg_rgb=RGBColor(245, 243, 255), border_rgb=C_PURPLE_IOT, border_pt=2)
-    tf_p2 = c_p2.text_frame
-    tf_p2.word_wrap = True
-    tf_p2.margin_left = tf_p2.margin_right = tf_p2.margin_top = tf_p2.margin_bottom = Inches(0.25)
-    
-    p = tf_p2.paragraphs[0]
-    r = p.add_run()
-    r.text = "Capstone Project 2 (แผนงานพัฒนาต่อเนื่อง)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(15)
-    r.font.bold = True
-    r.font.color.rgb = C_PURPLE_IOT
-
-    items_p2 = [
-        ("การประกอบฮาร์ดแวร์ลง Perfboard / Custom PCB:", "ติดตั้งตัวเก็บประจุเซรามิก Low-ESR 10 µF X7R และออกแบบแผ่นวงจรพิมพ์แยกกราวด์แอนะล็อก/ดิจิทัลอย่างสมบูรณ์"),
-        ("การทดสอบจริงในห้องปฏิบัติการฟิสิกส์:", "นำชิ้นงานเข้าทดสอบสเปกตรัมและแท่นหมุนร่วมกับอาจารย์ ดร.ประธาน บูรณศิริ ในห้องแล็บทัศนศาสตร์ สจล."),
-        ("การติดตั้ง Ultra-Low-Noise LDO Post-Regulator:", "เพิ่มชิป LDO สัญญาณรบกวนต่ำพิเศษ (TPS7A/LP5907) กรอง Switching Ripple สู่เกณฑ์ Noise Floor ระดับ Class A"),
-        ("การปรับปรุงตัวถัง Cosine Diffuser:", "วิจัยและทดสอบโดมกระจายแสง (Diffuser Dome) เช่น ควอตซ์หรือเทฟลอน เพื่อแก้ปัญหา Fresnel Drop ที่มุมชัน"),
-        ("การสอบเทียบกลางแจ้งเทียบกับมาตรฐาน ISO 9060:", "นำเครื่องวัดเข้าเทียบเคียงกับ Pyranometer อ้างอิงกลางแจ้งจริงตลอด 30 วัน")
-    ]
-    for h, b in items_p2:
-        p_i = tf_p2.add_paragraph()
-        p_i.space_before = Pt(8)
-        r_h = p_i.add_run()
-        r_h.text = f"➔ {h}\n"
-        r_h.font.bold = True
-        r_h.font.size = Pt(11)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_i.add_run()
-        r_b.text = f"   {b}"
-        r_b.font.size = Pt(10)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 4: Overall System Architecture (Block Diagram)
-    # =========================================================================
-    slide4 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide4, C_BG_LIGHT)
-    add_header(slide4, "System Architecture", "สถาปัตยกรรมระบบวัดและผังวงจรรวม 4 ภาคการทำงาน",
-               "โครงสร้างการเชื่อมต่อระหว่างภาคหัววัดแสง, วงจรแอนะล็อก 24 บิต, ไมโครคอนโทรลเลอร์ และภาคจ่ายไฟ 5.2V")
-    add_footer(slide4, 4)
-
-    # Embed High-Resolution System Block Diagram on Left
-    sys_diag_path = os.path.join(img_dir, "system_block_diagram.png")
-    if os.path.exists(sys_diag_path):
-        slide4.shapes.add_picture(sys_diag_path, Inches(0.8), Inches(1.85), width=Inches(8.1), height=Inches(4.9))
-
-    # Right: Summary Card of 4 Subsystems
-    c_s4 = add_card(slide4, 9.1, 1.85, 3.433, 4.9, bg_rgb=C_CARD_BG, border_rgb=C_BLUE_BRAND, border_pt=1.5)
-    tf_s4 = c_s4.text_frame
-    tf_s4.word_wrap = True
-    tf_s4.margin_left = tf_s4.margin_right = tf_s4.margin_top = tf_s4.margin_bottom = Inches(0.18)
-    
-    p = tf_s4.paragraphs[0]
-    r = p.add_run()
-    r.text = "สรุป 4 ภาคการทำงานหลัก"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    subs = [
-        ("1. Optical Sensing Head", "BPW 34 + กระจกแซฟไฟร์สังเคราะห์ + OPA380 TIA (R_TIA = 2.2 kΩ) แปลงกระแสแสงเป็นแรงดัน V_diode & V_bias"),
-        ("2. 24-bit Analog Front-End", "TI ADS1220 24-bit ΔΣ ADC (20 SPS, Sinc³ Filter) + TI REF5045 Precision Ref (4.500 V, 3 ppm/°C)"),
-        ("3. Processing & IoT Platform", "ESP32-C6 Super Mini (RISC-V) สื่อสาร SPI 1 MHz, DRDY Watchdog 150 ms, Web Server (Port 80) & REST API"),
-        ("4. Power Architecture", "5.2 V Switching Power Supply ก้าวข้าม Dropout ของ REF5045 พร้อมแผนเพิ่ม Low-Noise LDO ในโครงงาน 2")
-    ]
-    for h, b in subs:
-        p_sub = tf_s4.add_paragraph()
-        p_sub.space_before = Pt(6)
-        r_h = p_sub.add_run()
-        r_h.text = f"{h}:\n"
-        r_h.font.bold = True
-        r_h.font.size = Pt(10)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_sub.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(8.8)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 5: Optical Sensor Selection (BPW 34 vs BPX 61)
-    # =========================================================================
-    slide5 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide5, C_BG_LIGHT)
-    add_header(slide5, "Optical Hardware", "การคัดเลือกหัววัดแสงซิลิคอนและกระจกแซฟไฟร์สังเคราะห์",
-               "การวิเคราะห์เปรียบเทียบมิติทางกายภาพ พฤติกรรมเชิงมุม และคุณสมบัติการส่องผ่านทางแสง")
-    add_footer(slide5, 5)
-
-    # 3 Cards: BPX 61 vs BPW 34 vs Sapphire
-    w3 = 3.65
-    h3 = 5.0
-    
-    # Card 1: BPX 61
-    c_bpx = add_card(slide5, c_lefts[0], 1.75, w3, h3)
-    tf = c_bpx.text_frame
-    tf.word_wrap = True
-    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = Inches(0.15)
-    p = tf.paragraphs[0]
-    r = p.add_run()
-    r.text = "OSRAM BPX 61 (TO-39 Metal Can)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    # Embed Polar Plot BPX 61
-    p_bpx_img = os.path.join(img_dir, "(Directional Polar Plot) ของ BPX 61 .png")
-    if os.path.exists(p_bpx_img):
-        slide5.shapes.add_picture(p_bpx_img, Inches(0.95), Inches(2.25), width=Inches(3.35))
-
-    tb_bpx = slide5.shapes.add_textbox(Inches(0.95), Inches(4.7), Inches(3.35), Inches(1.9))
-    tf_b = tb_bpx.text_frame
-    tf_b.word_wrap = True
-    tf_b.margin_left = tf_b.margin_right = tf_b.margin_top = tf_b.margin_bottom = 0
-    pts_bpx = [
-        "ชิปขนาด 7.02 mm² ในตัวถังโลหะผนึกแน่น (Hermetic)",
-        "ชิปจมลึกในหลุมกระป๋องถึง 2.2 mm",
-        "มีกระจก Schott 8250 บัดกรีติดปากหลุม",
-        "มุมรับแสงครึ่งค่า ±55° (ตามสเปก)"
-    ]
-    for pt in pts_bpx:
-        p_pt = tf_b.add_paragraph()
-        r_pt = p_pt.add_run()
-        r_pt.text = f"• {pt}"
-        r_pt.font.size = Pt(9.5)
-        r_pt.font.color.rgb = C_TEXT_SUB
-
-    # Card 2: BPW 34
-    c_bpw = add_card(slide5, c_lefts[1], 1.75, w3, h3, bg_rgb=RGBColor(240, 253, 244), border_rgb=C_GREEN_OK)
-    tf = c_bpw.text_frame
-    tf.word_wrap = True
-    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = Inches(0.15)
-    p = tf.paragraphs[0]
-    r = p.add_run()
-    r.text = "OSRAM BPW 34 (Flat Mold) [เซนเซอร์หลัก]"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = C_GREEN_OK
-
-    p_bpw_img = os.path.join(img_dir, "(Directional Polar Plot) ของ BPW 34.png")
-    if os.path.exists(p_bpw_img):
-        slide5.shapes.add_picture(p_bpw_img, Inches(4.99), Inches(2.25), width=Inches(3.35))
-
-    tb_bpw = slide5.shapes.add_textbox(Inches(4.99), Inches(4.7), Inches(3.35), Inches(1.9))
-    tf_w = tb_bpw.text_frame
-    tf_w.word_wrap = True
-    tf_w.margin_left = tf_w.margin_right = tf_w.margin_top = tf_w.margin_bottom = 0
-    pts_bpw = [
-        "ชิปขนาด 7.02 mm² เท่ากัน แต่เป็นตัวถังแบนราบ",
-        "ไม่มีขอบหลุมกระป๋องโลหะมาบังแสงในมุมกว้าง",
-        "มุมรับแสงกว้างพิเศษ ±65° ตามกฎโคไซน์",
-        "ตอบสนองสอดคล้องกับมาตรฐาน ISO 9060 ดีเยี่ยม"
-    ]
-    for pt in pts_bpw:
-        p_pt = tf_w.add_paragraph()
-        r_pt = p_pt.add_run()
-        r_pt.text = f"• {pt}"
-        r_pt.font.size = Pt(9.5)
-        r_pt.font.color.rgb = C_TEXT_SUB
-
-    # Card 3: Sapphire Window
-    c_sap = add_card(slide5, c_lefts[2], 1.75, w3, h3)
-    tf = c_sap.text_frame
-    tf.word_wrap = True
-    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = Inches(0.15)
-    p = tf.paragraphs[0]
-    r = p.add_run()
-    r.text = "กระจกแซฟไฟร์สังเคราะห์ (Al₂O₃)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = C_AMBER_WARN
-
-    p_sap_img = os.path.join(img_dir, "sapphire_transmission_spectrum.png")
-    if os.path.exists(p_sap_img):
-        slide5.shapes.add_picture(p_sap_img, Inches(9.03), Inches(2.25), width=Inches(3.35))
-
-    tb_sap = slide5.shapes.add_textbox(Inches(9.03), Inches(4.7), Inches(3.35), Inches(1.9))
-    tf_s = tb_sap.text_frame
-    tf_s.word_wrap = True
-    tf_s.margin_left = tf_s.margin_right = tf_s.margin_top = tf_s.margin_bottom = 0
-    pts_sap = [
-        "ความแข็งระดับ 9 Mohs ทนทานต่อการขีดข่วนกลางแจ้ง",
-        "การส่องผ่านราบเรียบ 85–88% ตั้งแต่ UV ถึง NIR (200-1100 nm)",
-        "ไม่เกิดการดูดกลืนแสงเฉพาะย่านเหมือนแก้วโซดาไลม์",
-        "ทำหน้าที่เป็นโดมปกป้องพื้นผิวเซนเซอร์ในระยะยาว"
-    ]
-    for pt in pts_sap:
-        p_pt = tf_s.add_paragraph()
-        r_pt = p_pt.add_run()
-        r_pt.text = f"• {pt}"
-        r_pt.font.size = Pt(9.5)
-        r_pt.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 6: Optical Ray-tracing Discovery: BPX 61 Can Window Cut-off
-    # =========================================================================
-    slide6 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide6, C_BG_LIGHT)
-    add_header(slide6, "Major Optical Discovery", "การค้นพบความผิดเพี้ยนเชิงมุมของกระจกตัวถัง TO-39 (BPX 61)",
-               "การหักเหของแสงผ่านกระจกหน้าต่างส่งผลให้เกิดการตัดแสง (Cut-off) ร่นลงมาอย่างมีนัยสำคัญ")
-    add_footer(slide6, 6)
-
-    # Left: Simulation Result Image
-    p_sim_bpx = os.path.join(img_dir, "sim_bpx61_with_without_glass.png")
-    if os.path.exists(p_sim_bpx):
-        slide6.shapes.add_picture(p_sim_bpx, Inches(0.8), Inches(1.75), width=Inches(6.2))
-
-    # Right: Analysis & Findings Card
-    c_find = add_card(slide6, 7.2, 1.75, 5.333, 5.0, bg_rgb=RGBColor(254, 242, 242), border_rgb=RGBColor(239, 68, 68), border_pt=2)
-    tf_f = c_find.text_frame
-    tf_f.word_wrap = True
-    tf_f.margin_left = tf_f.margin_right = tf_f.margin_top = tf_f.margin_bottom = Inches(0.25)
-    
-    p = tf_f.paragraphs[0]
-    r = p.add_run()
-    r.text = "ข้อค้นพบสำคัญทางทัศนศาสตร์ (Critical Finding)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(14)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor(185, 28, 28)
-
-    pts_f = [
-        ("การจำลองแบบไม่มีกระจก (Without Glass):", "ลำแสงเดินทางเป็นเส้นตรงในอากาศ แสงเริ่มถูกขอบกระป๋องโลหะบังที่มุม 62° ซึ่งสอดคล้องตรงกับสเปกชีตของผู้ผลิต OSRAM"),
-        ("ปรากฏการณ์เมื่อมีกระจก Schott 8250:", "แสงที่ตกกระทบผิวแก้วที่มุมเฉียงจะเกิดการหักเห (Refraction) เบนเข้าหาแนวฉากตามกฎของสเนลล์ (Snell's Law) ทำให้ลำแสงที่ผ่านแก้วเบนลงต่ำกว่าปกติ"),
-        ("ผลกระทบทางกายภาพ:", "ลำแสงที่เบนต่ำพุ่งชนเข้ากับขอบด้านในของกระป๋องโลหะ TO-39 เร็วขึ้นอย่างมาก ส่งผลให้จุดตัดแสง (Cut-off) ร่นจาก 62° ลงมาเหลือเพียง 44°!"),
-        ("ผลลัพธ์เชิงวิศวกรรม:", "ที่มุม 44° ขึ้นไป เซนเซอร์มืดสนิท (0 W/m²) ทำให้เกิด Directional Error สูงถึง -100% ซึ่งไม่สามารถนำมาใช้เป็น Pyranometer ได้เลย!"),
-        ("ข้อสรุปการออกแบบ:", "คณะผู้จัดทำจึงตัดสินใจเลือกใช้โฟโตไดโอดตัวถังแบนราบ BPW 34 เป็นเซนเซอร์หลักเพื่อขจัดปัญหาขอบกระป๋องบังแสงอย่างสิ้นเชิง")
-    ]
-    for h, b in pts_f:
-        p_i = tf_f.add_paragraph()
-        p_i.space_before = Pt(6)
-        r_h = p_i.add_run()
-        r_h.text = f"• {h} "
-        r_h.font.bold = True
-        r_h.font.size = Pt(10.5)
-        r_h.font.color.rgb = RGBColor(153, 27, 27)
-        r_b = p_i.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(9.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 7: Optical Simulation of BPW 34 & ISO 9060
-    # =========================================================================
-    slide7 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide7, C_BG_LIGHT)
-    add_header(slide7, "Optical Simulation", "ผลการจำลองหัววัด BPW 34 และการประเมินมาตรฐาน ISO 9060",
-               "การวิเคราะห์การตอบสนองเชิงมุมของตัวถังแบนราบ และความจำเป็นในการทดสอบจริงในห้องปฏิบัติการ")
-    add_footer(slide7, 7)
-
-    # Left: Simulation Result Image
-    p_sim_bpw = os.path.join(img_dir, "sim_bpw34_with_without_glass.png")
-    if os.path.exists(p_sim_bpw):
-        slide7.shapes.add_picture(p_sim_bpw, Inches(0.8), Inches(1.75), width=Inches(6.2))
-
-    # Right: Analysis Card
-    c_bpw_a = add_card(slide7, 7.2, 1.75, 5.333, 5.0, bg_rgb=RGBColor(240, 253, 244), border_rgb=C_GREEN_OK, border_pt=1.5)
-    tf_ba = c_bpw_a.text_frame
-    tf_ba.word_wrap = True
-    tf_ba.margin_left = tf_ba.margin_right = tf_ba.margin_top = tf_ba.margin_bottom = Inches(0.25)
-
-    p = tf_ba.paragraphs[0]
-    r = p.add_run()
-    r.text = "การประเมินผลตามเกณฑ์ ISO 9060"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(14)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor(21, 128, 61)
-
-    pts_ba = [
-        ("BPW 34 แบบไม่มีกระจก (Without Glass):", "เส้นการตอบสนองเชิงมุมสอดคล้องกับกฎโคไซน์อุดมคติสมบูรณ์แบบ ผลการประเมิน Directional Error อยู่ในกรอบ ±10 W/m² ตลอดช่วงมุม 0 ถึง 80° ผ่านเกณฑ์มาตรฐาน ISO 9060 Class A อย่างสมบูรณ์"),
-        ("BPW 34 เมื่อติดตั้งกระจกแซฟไฟร์แบน:", "ในช่วงมุม 0° ถึง 50° การตอบสนองยังคงดีเยี่ยม แต่ที่มุมชันเกิน 55° ขึ้นไป การสะท้อนที่ผิวแก้วแซฟไฟร์ (Fresnel Reflection) เพิ่มสูงขึ้นอย่างรวดเร็ว ทำให้ค่าในแบบจำลองตกลงแตะระดับ -80 W/m²"),
-        ("ข้อจำกัดของแบบจำลองคณิตศาสตร์:", "โปรแกรมจำลองทางแสงมีข้อจำกัดในการคำนวณการสะท้อนหลายชั้น (Multiple Internal Reflections) และการกระเจิงผิวจริง"),
-        ("เหตุผลความจำเป็นที่ต้องทดลองจริง:", "ความจริงทางวิศวกรรมจึงไม่สามารถสรุปได้ด้วยการจำลองคอมพิวเตอร์เพียงอย่างเดียว คณะผู้จัดทำจึงต้องออกแบบข้อเสนอการทดลองจริงในห้องปฏิบัติการเพื่อพิสูจน์ค่าพารามิเตอร์จริง")
-    ]
-    for h, b in pts_ba:
-        p_i = tf_ba.add_paragraph()
-        p_i.space_before = Pt(8)
-        r_h = p_i.add_run()
-        r_h.text = f"• {h} "
-        r_h.font.bold = True
-        r_h.font.size = Pt(10.5)
-        r_h.font.color.rgb = RGBColor(21, 128, 61)
-        r_b = p_i.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(9.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 8: Proposed Optical Lab Validation (Dr. Prathan Collaboration)
-    # =========================================================================
-    slide8 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide8, C_BG_LIGHT)
-    add_header(slide8, "Lab Validation Proposal", "ข้อเสนอระเบียบวิธีการทดลองทางทัศนศาสตร์ในห้องปฏิบัติการ",
-               "การวางแผนการทดลองร่วมกับอาจารย์ ดร.ประธาน บูรณศิริ ในห้องปฏิบัติการภาควิชาฟิสิกส์ คณะวิทยาศาสตร์ สจล.")
-    add_footer(slide8, 8)
-
-    # 2 Subsections: Test 1 (Spectrometer) & Test 2 (Goniometer)
-    w_t = 5.7
-    h_t = 5.0
-
-    # Test 1: Vernier LabQuest 2
-    c_t1 = add_card(slide8, 0.8, 1.75, w_t, h_t)
-    tf_t1 = c_t1.text_frame
-    tf_t1.word_wrap = True
-    tf_t1.margin_left = tf_t1.margin_right = tf_t1.margin_top = tf_t1.margin_bottom = Inches(0.2)
-    p = tf_t1.paragraphs[0]
-    r = p.add_run()
-    r.text = "ชุดการทดลองที่ 1: ตรวจวัดสเปกตรัมการส่องผ่าน\n(Spectral Transmission Test with Vernier LabQuest 2)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(12.5)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    p_lq = os.path.join(img_dir, "labquest2_vernier_spectrometer.png")
-    if os.path.exists(p_lq):
-        slide8.shapes.add_picture(p_lq, Inches(1.0), Inches(2.45), width=Inches(5.3))
-
-    tb_t1_txt = slide8.shapes.add_textbox(Inches(1.0), Inches(5.15), Inches(5.3), Inches(1.5))
-    tf_t1t = tb_t1_txt.text_frame
-    tf_t1t.word_wrap = True
-    tf_t1t.margin_left = tf_t1t.margin_right = tf_t1t.margin_top = tf_t1t.margin_bottom = 0
-    pts_t1 = [
-        "ใช้เครื่องสเปกโตรมิเตอร์ Vernier LabQuest 2 ที่มีในห้องปฏิบัติการฟิสิกส์ สจล.",
-        "ตรวจวัดสเปกตรัมช่วงความยาวคลื่น 350.1 – 899.7 nm ครอบคลุมย่านตอบสนองหลัก",
-        "วัดเส้นฐานอ้างอิง I_0(λ) (100% Baseline) และวัดการส่องผ่านชิ้นงานแซฟไฟร์จริง I(λ)",
-        "คำนวณ %T(λ) = [I(λ)/I_0(λ)] × 100% เพื่อยืนยันว่าการส่องผ่านสม่ำเสมอ 85-88% จริง"
-    ]
-    for pt in pts_t1:
-        p_pt = tf_t1t.add_paragraph()
-        r_pt = p_pt.add_run()
-        r_pt.text = f"• {pt}"
-        r_pt.font.size = Pt(9)
-        r_pt.font.color.rgb = C_TEXT_SUB
-
-    # Test 2: Goniometer Stage
-    c_t2 = add_card(slide8, 6.83, 1.75, w_t, h_t)
-    tf_t2 = c_t2.text_frame
-    tf_t2.word_wrap = True
-    tf_t2.margin_left = tf_t2.margin_right = tf_t2.margin_top = tf_t2.margin_bottom = Inches(0.2)
-    p = tf_t2.paragraphs[0]
-    r = p.add_run()
-    r.text = "ชุดการทดลองที่ 2: วัดการตอบสนองเชิงมุมบนแท่นหมุน\n(Directional Cosine Response Test on Goniometer Stage)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(12.5)
-    r.font.bold = True
-    r.font.color.rgb = C_PURPLE_IOT
-
-    p_gon = os.path.join(img_dir, "goniometer_blender_perspective.png")
-    if os.path.exists(p_gon):
-        slide8.shapes.add_picture(p_gon, Inches(7.03), Inches(2.45), width=Inches(5.3))
-
-    tb_t2_txt = slide8.shapes.add_textbox(Inches(7.03), Inches(5.15), Inches(5.3), Inches(1.5))
-    tf_t2t = tb_t2_txt.text_frame
-    tf_t2t.word_wrap = True
-    tf_t2t.margin_left = tf_t2t.margin_right = tf_t2t.margin_top = tf_t2t.margin_bottom = 0
-    pts_t2 = [
-        "จำลองแบบ 3D Setup ด้วย Blender: ท่อ Collimator + แท่นหมุนองศา (Rotary Stage)",
-        "หมุนทดสอบตั้งแต่ 0° ถึง 85° ละเอียดทุก 5° เพื่อพล็อต Polar Cosine Response Curve",
-        "ข้อเสนอชุดกำเนิดแสงแสวงเครื่อง (Practical Setup): ใช้หลอดทังสเตน-ฮาโลเจน (DC Bench Power) ร่วมกับท่อ Collimator สีดำและม่าน Iris บีบลำแสงขนาน",
-        "ทดสอบเปรียบเทียบ BPW 34 ทั้งกรณีมีและไม่มีกระจก เพื่อนำข้อมูลจริงไปออกแบบ Diffuser"
-    ]
-    for pt in pts_t2:
-        p_pt = tf_t2t.add_paragraph()
-        r_pt = p_pt.add_run()
-        r_pt.text = f"• {pt}"
-        r_pt.font.size = Pt(9)
-        r_pt.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # =========================================================================
-    # SLIDE 8.5: Photodiode Physics & Transimpedance Amplifier (TIA) Theory
-    # =========================================================================
-    slide_tia = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide_tia, C_BG_LIGHT)
-    add_header(slide_tia, "Analog Front-End Theory", "ทฤษฎีโฟโตไดโอดและวงจรขยายกระแสแสง (Photodiode & TIA Theory)",
-               "การวิเคราะห์ฟิสิกส์โหมด Photovoltaic (Zero Bias) และการแปลงกระแสแสง I_photo ด้วย Zero-Drift Op-Amp")
-    add_footer(slide_tia, 9)
-
-    # 2 Big Cards: Left (Photodiode Modes & IV Curve), Right (TIA Architecture & Transfer Function)
-    w_half = 5.65
-    h_body = 5.0
-    
-    # Left Card: Photodiode Physics & IV Curve
-    c_left = add_card(slide_tia, c_lefts[0], 1.75, w_half, h_body)
-    tf_l = c_left.text_frame
-    tf_l.word_wrap = True
-    tf_l.margin_left = tf_l.margin_right = tf_l.margin_top = tf_l.margin_bottom = Inches(0.12)
-    p = tf_l.paragraphs[0]
-    r = p.add_run()
-    r.text = "1. ฟิสิกส์โฟโตไดโอด & การเลือกโหมด Photovoltaic"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(12)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    # Embed IV Curve image
-    iv_img = os.path.join(img_dir, "photodiode_iv_curve.png")
-    if os.path.exists(iv_img):
-        slide_tia.shapes.add_picture(iv_img, Inches(0.95), Inches(2.15), width=Inches(5.4))
-
-    tb_l_pts = slide_tia.shapes.add_textbox(Inches(0.95), Inches(5.1), Inches(5.4), Inches(1.5))
-    tf_lp = tb_l_pts.text_frame
-    tf_lp.word_wrap = True
-    tf_lp.margin_left = tf_lp.margin_right = tf_lp.margin_top = tf_lp.margin_bottom = 0
-    l_bullets = [
-        "Photovoltaic Mode (V_D = 0V): ขั้วไดโอดไม่มีแรงดันตกคร่อม -> กระแส Dark Current เป็นศูนย์ (I_dark = 0 nA)",
-        "ความเป็นเชิงเส้นสมบูรณ์ (High Linearity): กระแส I_photo แปรผันตรงกับความเข้มแสงอาทิตย์ (W/m²) ครอบคลุม 6 Decades",
-        "ตัดปัญหา Dark Current Thermal Drift: โหมด Photoconductive กระแสรั่วจะเบิ้ล 2 เท่าทุกๆ 10°C จึงไม่เหมาะกับงานนี้"
-    ]
-    for b in l_bullets:
-        p_b = tf_lp.add_paragraph()
-        r_b = p_b.add_run()
-        r_b.text = f"• {b}"
-        r_b.font.size = Pt(8.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # Right Card: TIA Architecture & Zero-Drift Op-Amp
-    c_right = add_card(slide_tia, c_lefts[0] + w_half + 0.35, 1.75, w_half, h_body)
-    tf_r = c_right.text_frame
-    tf_r.word_wrap = True
-    tf_r.margin_left = tf_r.margin_right = tf_r.margin_top = tf_r.margin_bottom = Inches(0.12)
-    p = tf_r.paragraphs[0]
-    r = p.add_run()
-    r.text = "2. สถาปัตยกรรม TIA & Zero-Drift Op-Amp (OPA388)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(12)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    # Embed TIA Circuit image
-    tia_img = os.path.join(img_dir, "tia_circuit_architecture.png")
-    if os.path.exists(tia_img):
-        slide_tia.shapes.add_picture(tia_img, Inches(6.95), Inches(2.15), width=Inches(5.4))
-
-    tb_r_pts = slide_tia.shapes.add_textbox(Inches(6.95), Inches(5.1), Inches(5.4), Inches(1.5))
-    tf_rp = tb_r_pts.text_frame
-    tf_rp.word_wrap = True
-    tf_rp.margin_left = tf_rp.margin_right = tf_rp.margin_top = tf_rp.margin_bottom = 0
-    r_bullets = [
-        "Virtual Short บังคับ V_D = 0.000V: ขา Inverting ถูกดึงเท่ากับ V_bias ทำให้ขั้วไดโอดเป็น Zero-Bias ตลอดเวลา",
-        "ฟังก์ชันถ่ายโอน: V_out = V_bias + (I_photo × R_TIA) โดย R_TIA = 2.2 kΩ -> Sensitivity = 2.2 mV / μA",
-        "OPA388 Zero-Drift: แรงดัน V_OS ต่ำสุดขีด ±0.25 μV และ Drift เพียง 0.005 μV/°C ป้องกันการเกิด Dark Current ถาวร",
-        "Ultra-low Input Bias Current: I_B = ±30 pA ไม่ก่อกวนสัญญาณกระแสแสงโฟโตเคอร์เรนต์ในย่านไมโครแอมป์"
-    ]
-    for b in r_bullets:
-        p_b = tf_rp.add_paragraph()
-        r_b = p_b.add_run()
-        r_b.text = f"• {b}"
-        r_b.font.size = Pt(8.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # SLIDE 9: 24-bit Analog Front-End (ADS1220 + REF5045)
-    # =========================================================================
-    slide9 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide9, C_BG_LIGHT)
-    add_header(slide9, "24-bit Hardware AFE", "การออกแบบวงจรขยายและแปลงสัญญาณความละเอียดสูง 24 บิต",
-               "โครงสร้างไอซี ADS1220, แรงดันอ้างอิงความเที่ยงตรงสูง REF5045 และเทคนิค Pseudo-Differential")
-    add_footer(slide9, 10)
-
-    # Left: ADS1220 Block Diagram
-    p_ads = os.path.join(img_dir, "ADS1220_diagram.png")
-    if os.path.exists(p_ads):
-        slide9.shapes.add_picture(p_ads, Inches(0.8), Inches(1.75), width=Inches(5.2))
-
-    # Right: Circuit Features Card
-    c_afe = add_card(slide9, 6.2, 1.75, 6.333, 5.0)
-    tf_af = c_afe.text_frame
-    tf_af.word_wrap = True
-    tf_af.margin_left = tf_af.margin_right = tf_af.margin_top = tf_af.margin_bottom = Inches(0.2)
-    p = tf_af.paragraphs[0]
-    r = p.add_run()
-    r.text = "คุณสมบัติทางวิศวกรรมของวงจร AFE 24 บิต"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(14)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    pts_af = [
-        ("TI ADS1220 (24-bit Delta-Sigma ADC):", "ความละเอียดการแปลงสัญญาณสูงถึง 24 บิต (16,777,216 ระดับ) สามารถตรวจวัดกระแสแสงโฟโตเคอร์เรนต์ได้ละเอียดถึงระดับ sub-microampere"),
-        ("Single-Ended Input MUX vs AVSS (GND):", "ตั้งค่าอ่าน 4 ช่องสัญญาณเทียบกราวด์ (Gain=1, PGA Bypassed) รองรับช่วงแรงดันอินพุตเต็มพิกัด 0 ถึง 4.500 V"),
-        ("วงจรกรองดิจิทัล Sinc³ Filter (20 SPS Normal Mode):", "ตัดทอนสัญญาณรบกวนความถี่คู่ควบ 50 Hz/60 Hz จากสายส่งไฟฟ้าได้อย่างสมบูรณ์แบบ"),
-        ("แรงดันอ้างอิงภายนอก TI REF5045AID (4.500 V):", "ค่าความคลาดเคลื่อนเริ่มต้นต่ำเพียง ±0.05% และมีอัตราการเลื่อนลอยทางอุณหภูมิต่ำพิเศษ 3 ppm/°C ต่อเข้าขั้ว REFP0/REFN0"),
-        ("การประมวลผลผลต่างเทียม (Software Pseudo-Differential):", "อ่านแรงดัน AIN2 (V_diode) และ AIN3 (V_bias) แล้วคำนวณหักลบในไมโครคอนโทรลเลอร์:\nV_diode_actual = V_AIN2 - V_AIN3  |  I_photo = V_diode_actual / 2,200 Ω\nช่วยตัดทอน DC Offset และ Common-Mode Noise ออกได้อย่างสมบูรณ์")
-    ]
-    for h, b in pts_af:
-        p_i = tf_af.add_paragraph()
-        p_i.space_before = Pt(6)
-        r_h = p_i.add_run()
-        r_h.text = f"• {h} "
-        r_h.font.bold = True
-        r_h.font.size = Pt(10.5)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_i.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(9.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 10: Multi-Point Thermal Monitoring & Compensation
-    # =========================================================================
-    slide10 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide10, C_BG_LIGHT)
-    add_header(slide10, "Thermal Architecture", "สถาปัตยกรรมตรวจวัดอุณหภูมิ 3 จุดเพื่อการชดเชยความร้อน",
-               "การแก้ปัญหาค่าสัมประสิทธิ์อุณหภูมิของโฟโตไดโอด (TC_I ≈ +0.18%/K) ด้วยการมอนิเตอร์ความร้อนหลายจุด")
-    add_footer(slide10, 11)
-
-    # 3 Cards for 3 Thermal Sensors
-    w_th = 3.65
-    h_th = 4.2
-    
-    # Sensor 1: NTC
-    c_t1 = add_card(slide10, c_lefts[0], 1.75, w_th, h_th, bg_rgb=RGBColor(240, 249, 255), border_rgb=C_BLUE_BRAND)
-    tf1 = c_t1.text_frame
-    tf1.word_wrap = True
-    tf1.margin_left = tf1.margin_right = tf1.margin_top = tf1.margin_bottom = Inches(0.2)
-    p = tf1.paragraphs[0]
-    r = p.add_run()
-    r.text = "1. อุณหภูมิผิวหัววัดแสง\n(Surface NTC Thermistor)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    pts_ntc = [
-        ("ช่องสัญญาณ ADS1220:", "AIN1 (0x91) Single-Ended"),
-        ("เบอร์อุปกรณ์:", "Thinking TTC3A103F39HAEY"),
-        ("คุณสมบัติทางเทคนิค:", "10 kΩ ±1% ที่ 25°C, ค่าสัมประสิทธิ์ B₂₅/₈₅ = 3950 K"),
-        ("หน้าที่การทำงาน:", "ติดตั้งแนบชิดกับตัวถังโฟโตไดโอด วัดอุณหภูมิผิวจริง (T_surface) เพื่อนำไปคำนวณชดเชยค่ากระแสโฟโตเคอร์เรนต์ในสูตรทางคณิตศาสตร์")
-    ]
-    for h, b in pts_ntc:
-        p_i = tf1.add_paragraph()
-        p_i.space_before = Pt(6)
-        r_h = p_i.add_run()
-        r_h.text = f"• {h} "
-        r_h.font.bold = True
-        r_h.font.size = Pt(10)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_i.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(9.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # Sensor 2: REF5045 Temp Pin 3
-    c_t2 = add_card(slide10, c_lefts[1], 1.75, w_th, h_th, bg_rgb=RGBColor(254, 243, 199), border_rgb=C_AMBER_WARN)
-    tf2 = c_t2.text_frame
-    tf2.word_wrap = True
-    tf2.margin_left = tf2.margin_right = tf2.margin_top = tf2.margin_bottom = Inches(0.2)
-    p = tf2.paragraphs[0]
-    r = p.add_run()
-    r.text = "2. อุณหภูมิไอซีแรงดันอ้างอิง\n(REF5045 Pin 3 TEMP)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = C_AMBER_WARN
-
-    pts_ref = [
-        ("ช่องสัญญาณ ADS1220:", "AIN0 (0x81) Single-Ended"),
-        ("เบอร์อุปกรณ์:", "TI REF5045AID (Pin 3 TEMP)"),
-        ("คุณสมบัติทางเทคนิค:", "V_TEMP = 509 mV + 2.64 mV/°C ความไวเชิงเส้นสูง"),
-        ("หน้าที่การทำงาน:", "ตรวจวัดอุณหภูมิของตัวถังไอซีสร้างแรงดันอ้างอิง แปลงค่าด้วยสูตร:\nT_REF = (V_AIN0 - 0.509) / 0.00264\nเพื่อตรวจสอบเสถียรภาพความร้อนของระบบ")
-    ]
-    for h, b in pts_ref:
-        p_i = tf2.add_paragraph()
-        p_i.space_before = Pt(6)
-        r_h = p_i.add_run()
-        r_h.text = f"• {h} "
-        r_h.font.bold = True
-        r_h.font.size = Pt(10)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_i.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(9.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # Sensor 3: Internal TS=1
-    c_t3 = add_card(slide10, c_lefts[2], 1.75, w_th, h_th, bg_rgb=RGBColor(240, 253, 244), border_rgb=C_GREEN_OK)
-    tf3 = c_t3.text_frame
-    tf3.word_wrap = True
-    tf3.margin_left = tf3.margin_right = tf3.margin_top = tf3.margin_bottom = Inches(0.2)
-    p = tf3.paragraphs[0]
-    r = p.add_run()
-    r.text = "3. อุณหภูมิภายในตัวชิป ADC\n(ADS1220 Internal Junction)"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = C_GREEN_OK
-
-    pts_ads = [
-        ("โหมดการทำงาน:", "Register 1 บิต TS = 1 (0x02)"),
-        ("เซนเซอร์ภายใน:", "Internal Temperature Diode Junction"),
-        ("คุณสมบัติทางเทคนิค:", "ความละเอียด 14 บิต (0.03125 °C/LSB)"),
-        ("หน้าที่การทำงาน:", "ตรวจวัดอุณหภูมิรอยต่อซิลิคอนภายในตัวชิปแปลงสัญญาณ ADC โดยตรง แปลงค่าด้วยสูตร:\nT_ADS = RawValue × 0.03125 °C\nเฝ้าระวัง Thermal Drift ภายในระบบ")
-    ]
-    for h, b in pts_ads:
-        p_i = tf3.add_paragraph()
-        p_i.space_before = Pt(6)
-        r_h = p_i.add_run()
-        r_h.text = f"• {h} "
-        r_h.font.bold = True
-        r_h.font.size = Pt(10)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_i.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(9.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # Bottom Formula Banner
-    c_ban = add_card(slide10, 0.8, 6.1, 11.733, 0.75, bg_rgb=RGBColor(248, 250, 252), border_rgb=RGBColor(203, 213, 225))
-    tf_ban = c_ban.text_frame
-    tf_ban.margin_left = tf_ban.margin_right = tf_ban.margin_top = tf_ban.margin_bottom = 0
-    p_b = tf_ban.paragraphs[0]
-    p_b.alignment = PP_ALIGN.CENTER
-    r_b = p_b.add_run()
-    r_b.text = "สมการชดเชยกระแสแสงในเฟิร์มแวร์:   I_corrected = I_photo / [ 1 + TC_I × (T_surface - 25°C) ]    โดยที่ TC_I = +0.18%/K"
-    r_b.font.name = FONT_HEAD
-    r_b.font.size = Pt(11)
-    r_b.font.bold = True
-    r_b.font.color.rgb = C_BLUE_BRAND
-
-    # =========================================================================
-    # SLIDE 11: Hardware Prototyping & Breadboard Debugging Discoveries
-    # =========================================================================
-    slide11 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide11, C_BG_LIGHT)
-    add_header(slide11, "Prototyping & Debugging", "การสร้างต้นแบบจริงบน Breadboard และการแก้ปัญหาเชิงวิศวกรรม",
-               "การค้นพบทางวิศวกรรมที่สำคัญ 2 ประการจากการทดลองประกอบวงจรจริงในห้องปฏิบัติการ")
-    add_footer(slide11, 12)
-
-    # Left: Photo of Real Prototype
-    p_bb = os.path.join(img_dir, "power_switching_prototype.jpg")
-    if not os.path.exists(p_bb):
-        p_bb = os.path.join(img_dir, "breadboard_real_photo.jpg")
-    if os.path.exists(p_bb):
-        slide11.shapes.add_picture(p_bb, Inches(0.8), Inches(1.75), width=Inches(5.0))
-
-    # Right: 2 Discoveries Card
-    c_disc = add_card(slide11, 6.0, 1.75, 6.533, 5.0)
-    tf_d = c_disc.text_frame
-    tf_d.word_wrap = True
-    tf_d.margin_left = tf_d.margin_right = tf_d.margin_top = tf_d.margin_bottom = Inches(0.2)
-    p = tf_d.paragraphs[0]
-    r = p.add_run()
-    r.text = "ประเด็นปัญหาและการแก้ไขเชิงวิศวกรรมบน Breadboard"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13.5)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    pts_disc = [
-        ("1. ปัญหา High-Z Node Leakage บนขา 5 (Trim/NR):", 
-         "ในการต่อวงจรช่วงแรก แรงดันตกเหลือ 4.382 V (หายไป 118 mV) ตรวจสอบพบว่าขา 5 เป็นโหนดความต้านทานสูงมากและเกิดกระแสไฟฟ้ารั่วบนรางเบรดบอร์ด -> แก้ไขโดยการเว้นว่าง (DNP) การเชื่อมต่อขา 5 ทันที"),
-        ("2. ปัญหา USB Dropout Voltage จากสายคอมพิวเตอร์:", 
-         "เมื่อจ่ายไฟผ่าน USB 5V ของคอมพิวเตอร์ แรงดันตกเหลือต่ำกว่า 4.70 V ทำให้ REF5045 ตกสภาวะ Dropout (ต้องการ V_IN ≥ V_REF + 200 mV) เอาต์พุตแกว่งตามโหลด PC"),
-        ("3. การแก้ปัญหาด้วย Switching Power Supply 5.2 V:", 
-         "เปลี่ยนมาใช้แหล่งจ่ายไฟตรงแบบสวิตชิ่งปรับแรงดันที่ 5.20 V สร้างส่วนต่างแรงดันตกคร่อมสูงถึง 700 mV (> 200 mV) ทำให้ REF5045 ควบคุมแรงดันอ้างอิงนิ่งสนิทที่ 4.491 V (คลาดเคลื่อนเพียง -0.2% ในเกณฑ์ DMM)"),
-        ("4. แผนงานการประกอบ Perfboard และชิป Low-Noise LDO:", 
-         "ได้วิเคราะห์พบว่าความเหนี่ยวนำแฝงบนรางเบรดบอร์ดลดทอน Phase Margin จึงได้สั่งซื้อตัวเก็บประจุเซรามิก Low-ESR 10 µF X7R เพื่อนำมาบัดกรีลง Perfboard ในคราวเดียว และวางแผนต่อยอดด้วย LDO (TPS7A) ใน Capstone 2")
-    ]
-    for h, b in pts_disc:
-        p_i = tf_d.add_paragraph()
-        p_i.space_before = Pt(6)
-        r_h = p_i.add_run()
-        r_h.text = f"• {h}\n"
-        r_h.font.bold = True
-        r_h.font.size = Pt(10)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_i.add_run()
-        r_b.text = f"   {b}"
-        r_b.font.size = Pt(9.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 12: Dual-Variant Custom 4-Layer PCB Design (BPX 61 vs BPW 34)
-    # =========================================================================
-    slide12 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide12, C_BG_LIGHT)
-    add_header(slide12, "Hardware Engineering", "การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์คู่ขนาน (BPX 61 vs. BPW 34)",
-               "ชิปซิลิคอน ams-OSRAM เดียวกัน (2.65 × 2.65 mm²) — เปรียบเทียบผลของตัวถัง TO-39 กับ Flat DIL บน KiCad 10")
-    add_footer(slide12, 13)
-
-    # Left: Two 3D Renders (BPX 61 vs BPW 34)
-    p_bpx = os.path.join(img_dir, "pcb_3d_render_iso.png")
-    p_bpw = os.path.join(img_dir, "pcb_bpw34_3d_render_iso.png")
-    if os.path.exists(p_bpx) and os.path.exists(p_bpw):
-        slide12.shapes.add_picture(p_bpx, Inches(0.8), Inches(1.75), width=Inches(2.7))
-        slide12.shapes.add_picture(p_bpw, Inches(3.6), Inches(1.75), width=Inches(2.7))
-        
-        # Sub-captions under renders
-        tb_c1 = slide12.shapes.add_textbox(Inches(0.8), Inches(5.95), Inches(2.7), Inches(0.8))
-        tf_c1 = tb_c1.text_frame
-        tf_c1.word_wrap = True
-        tf_c1.margin_left = tf_c1.margin_right = tf_c1.margin_top = tf_c1.margin_bottom = 0
-        p_c1 = tf_c1.paragraphs[0]
-        p_c1.alignment = PP_ALIGN.CENTER
-        r_c1 = p_c1.add_run()
-        r_c1.text = "แบบที่ 1: BPX 61\n(TO-39 Metal Can, สูง 5mm)"
-        r_c1.font.name = FONT_BODY
-        r_c1.font.size = Pt(9.5)
-        r_c1.font.bold = True
-        r_c1.font.color.rgb = C_BLUE_BRAND
-
-        tb_c2 = slide12.shapes.add_textbox(Inches(3.6), Inches(5.95), Inches(2.7), Inches(0.8))
-        tf_c2 = tb_c2.text_frame
-        tf_c2.word_wrap = True
-        tf_c2.margin_left = tf_c2.margin_right = tf_c2.margin_top = tf_c2.margin_bottom = 0
-        p_c2 = tf_c2.paragraphs[0]
-        p_c2.alignment = PP_ALIGN.CENTER
-        r_c2 = p_c2.add_run()
-        r_c2.text = "แบบที่ 2: BPW 34\n(Flat DIL Plastic, สูง 1.9mm)"
-        r_c2.font.name = FONT_BODY
-        r_c2.font.size = Pt(9.5)
-        r_c2.font.bold = True
-        r_c2.font.color.rgb = C_GREEN_OK
-    elif os.path.exists(p_bpx):
-        slide12.shapes.add_picture(p_bpx, Inches(0.8), Inches(1.75), width=Inches(5.5))
-
-    # Right: PCB Architecture Card
-    c_pcb = add_card(slide12, 6.5, 1.75, 6.033, 5.0)
-    tf_pcb = c_pcb.text_frame
-    tf_pcb.word_wrap = True
-    tf_pcb.margin_left = tf_pcb.margin_right = tf_pcb.margin_top = tf_pcb.margin_bottom = Inches(0.2)
-    p = tf_pcb.paragraphs[0]
-    r = p.add_run()
-    r.text = "การออกแบบฮาร์ดแวร์คู่ขนานเพื่อการทดลองควบคุม"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = C_BLUE_BRAND
-
-    pts_pcb = [
-        ("ชิปซิลิคอนตัวเดียวกัน (Identical ams-OSRAM Die):", 
-         "ทั้ง BPX 61 และ BPW 34 ผลิตโดย ams OSRAM โดยใช้เนื้อชิปซิลิคอนขนาดเดียวกันเป๊ะ คือ 2.65 × 2.65 mm² (พื้นที่รับแสง 7.02 mm²) ทำให้คุณสมบัติทางไฟฟ้าและสเปกตรัมเท่ากันทุกประการ"),
-        ("การทดลองแบบควบคุมตัวแปร (Controlled Experiment):", 
-         "เมื่อเนื้อชิปเหมือนกัน ความแตกต่างทั้งหมดของการทดลองจึงมาจาก 'รูปทรงตัวถังและหน้าต่างทางทัศนศาสตร์' โดยตรง ช่วยพิสูจน์สมมติฐานทางฟิสิกส์ได้อย่างแม่นยำ ไร้ตัวแปรแทรกซ้อน"),
-        ("ลดความสูงตัวถังลงกว่า 60% (Flat Low-Profile Design):", 
-         "ตัวถัง BPW 34 หนาเพียง 1.9 mm (เทียบกับ TO-39 สูงถึง 5 mm) ทำให้บอร์ดตรงกลางแบนราบ สวมโดมกระจายแสง (Diffuser Dome) ได้แนบชิดและกะทัดรัด"),
-        ("ขจัดปัญหาการตัดแสงมุมชัน (Zero Vignetting):", 
-         "บอร์ด BPW 34 ไร้ขอบกระป๋องโลหะบังแสงที่มุม 44° ตอบสนองเชิงมุมได้กว้างเกือบ 180° ตามกฎโคไซน์ สอดคล้องกับมาตรฐาน ISO 9060 Class A"),
-        ("ความพร้อมในการผลิต (100% DRC Zero Violations):", 
-         "ทั้ง 2 โครงการ (L1_Analog และ L1_Analog_BPW34) ผ่านการตรวจสอบ Design Rules Check ครบถ้วน (0 Errors) พร้อมส่งผลิตโรงงาน (PCBWay) สำหรับใช้ใน Capstone 2")
-    ]
-    for h, b in pts_pcb:
-        p_i = tf_pcb.add_paragraph()
-        p_i.space_before = Pt(4)
-        r_h = p_i.add_run()
-        r_h.text = f"• {h}\n"
-        r_h.font.bold = True
-        r_h.font.size = Pt(9.6)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_i.add_run()
-        r_b.text = f"   {b}"
-        r_b.font.size = Pt(9.0)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 13: Embedded Firmware & IoT Platform
-    # =========================================================================
-    slide13 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide13, C_BG_LIGHT)
-    add_header(slide13, "Firmware & IoT Platform", "เฟิร์มแวร์ไมโครคอนโทรลเลอร์ ESP32-C6 และระบบ IoT Web Server",
-               "การควบคุมบัสสื่อสาร SPI, การเฝ้าระวัง Watchdog และการรายงานข้อมูลสดแบบไร้สายผ่านเครือข่าย Wi-Fi")
-    add_footer(slide13, 14)
-
-    # Left: Serial Monitor Output Image
-    p_ser = os.path.join(img_dir, "Read value from ardunio.png")
-    if os.path.exists(p_ser):
-        slide12.shapes.add_picture(p_ser, Inches(0.8), Inches(1.75), width=Inches(5.5))
-
-    # Right: Firmware Highlights Card
-    c_fw = add_card(slide12, 6.5, 1.75, 6.033, 5.0)
-    tf_fw = c_fw.text_frame
-    tf_fw.word_wrap = True
-    tf_fw.margin_left = tf_fw.margin_right = tf_fw.margin_top = tf_fw.margin_bottom = Inches(0.2)
-    p = tf_fw.paragraphs[0]
-    r = p.add_run()
-    r.text = "โครงสร้างเฟิร์มแวร์และการทำงานของระบบ IoT"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(13.5)
-    r.font.bold = True
-    r.font.color.rgb = C_PURPLE_IOT
-
-    pts_fw = [
-        ("ESP32-C6 Super Mini (RISC-V 32-bit Architecture):", "ไมโครคอนโทรลเลอร์สมรรถนะสูง รองรับ Wi-Fi 6 (2.4 GHz) และการประมวลผลสัญญาณดิจิทัลแบบประหยัดพลังงาน"),
-        ("Hardware SPI Master (1 MHz, Mode 1):", "กำหนดขาเชื่อมต่อชัดเจน: SCLK (GPIO 6), MISO (GPIO 2), MOSI (GPIO 4), CS (GPIO 14) ส่งคำสั่งและอ่านผลแปลง 24 บิตได้อย่างแม่นยำ"),
-        ("ระบบเฝ้าระวังและกู้คืนอัตโนมัติ (DRDY Watchdog Protection):", "ขา DRDY (GPIO 0) ตรวจจับความพร้อมของการแปลงสัญญาณ หากเกิด Timeout เกิน 150 ms ระบบจะส่งคำสั่ง CMD_RESET (0x06) เพื่อกู้คืน ADC ทันที"),
-        ("Embedded Web Server (Port 80):", "ให้บริการหน้าจอ Real-time Web Dashboard แบบ Responsive ดึงข้อมูลสดผ่าน AJAX/Fetch API ทุก 1 วินาที โดยไม่ต้องรีเฟรชหน้าเว็บ"),
-        ("RESTful JSON API (/data):", "เปิดช่องทางบริการข้อมูล JSON เพื่อให้ระบบคลาวด์หรือคอมพิวเตอร์ภายนอกดึงข้อมูลไปบันทึกและวิเคราะห์ทางสถิติต่อได้ทันที")
-    ]
-    for h, b in pts_fw:
-        p_i = tf_fw.add_paragraph()
-        p_i.space_before = Pt(6)
-        r_h = p_i.add_run()
-        r_h.text = f"• {h}\n"
-        r_h.font.bold = True
-        r_h.font.size = Pt(10)
-        r_h.font.color.rgb = C_TEXT_MAIN
-        r_b = p_i.add_run()
-        r_b.text = f"   {b}"
-        r_b.font.size = Pt(9.5)
-        r_b.font.color.rgb = C_TEXT_SUB
-
-    # =========================================================================
-    # SLIDE 14: Live Experimental Results on Breadboard
-    # =========================================================================
-    slide14 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide14, C_BG_LIGHT)
-    add_header(slide14, "Experimental Results", "ผลการทดสอบการอ่านค่าจริงบน Breadboard ใน 4 สภาวะแสง",
-               "การพิสูจน์การตอบสนองเชิงไดนามิกและการตัดทอนออฟเซ็ตด้วยเทคนิค Pseudo-Differential")
-    add_footer(slide14, 15)
-
-    # Big Clean Table for Results
-    rows = 5
-    cols = 7
-    left = Inches(0.8)
-    top = Inches(1.85)
-    width = Inches(11.733)
-    height = Inches(3.2)
-
-    table_shape = slide14.shapes.add_table(rows, cols, left, top, width, height)
-    t = table_shape.table
-
-    # Column widths
-    t.columns[0].width = Inches(2.7)
-    t.columns[1].width = Inches(1.5)
-    t.columns[2].width = Inches(1.5)
-    t.columns[3].width = Inches(1.5)
-    t.columns[4].width = Inches(1.5)
-    t.columns[5].width = Inches(1.5)
-    t.columns[6].width = Inches(1.533)
-
-    headers = ["สภาวะแสงทดสอบ", "AIN0: Temp REF", "AIN1: NTC", "AIN2: V_diode", "AIN3: V_bias", "Net Diode", "I_photo คำนวณ"]
-    for j, h in enumerate(headers):
-        cell = t.cell(0, j)
-        cell.fill.solid()
-        cell.fill.fore_color.rgb = RGBColor(241, 245, 249)
-        p = cell.text_frame.paragraphs[0]
-        p.alignment = PP_ALIGN.CENTER
-        r = p.add_run()
-        r.text = h
-        r.font.name = FONT_HEAD
-        r.font.size = Pt(10.5)
-        r.font.bold = True
-        r.font.color.rgb = C_TEXT_MAIN
-
-    data_rows = [
-        ["1. ปิดไฟมืดสนิท (Dark / Offset)", "0.6008 V (34.77°C)", "1.0538 V (34.75°C)", "0.00282 V", "0.00280 V", "+0.020 mV", "0.009 µA"],
-        ["2. เปิดแสงสว่างปกติในห้อง", "0.6010 V (34.85°C)", "1.0538 V (34.75°C)", "0.02480 V", "0.00278 V", "+22.020 mV", "10.009 µA"],
-        ["3. เปิดแสง LED สีส้มสว่างสุด", "0.6019 V (35.19°C)", "1.0531 V (34.92°C)", "0.05780 V", "0.00278 V", "+55.020 mV", "25.009 µA"],
-        ["4. เปิดแสงส้ม + ขาวพร้อมกัน", "0.6022 V (35.30°C)", "1.0526 V (35.12°C)", "0.13482 V", "0.00276 V", "+132.060 mV", "60.027 µA"]
-    ]
-
-    for i, row in enumerate(data_rows):
+    tab3 = s3.shapes.add_table(len(rows_s3), 5, Inches(0.85), Inches(1.95), Inches(11.63), Inches(4.8)).table
+    col_w3 = [3.33, 2.0, 1.9, 1.9, 2.5]
+    for j, w in enumerate(col_w3):
+        tab3.columns[j].width = Inches(w)
+
+    for i, row in enumerate(rows_s3):
         for j, val in enumerate(row):
-            cell = t.cell(i+1, j)
+            cell = tab3.cell(i, j)
+            cell.vertical_anchor = MSO_ANCHOR.MIDDLE
             cell.fill.solid()
-            cell.fill.fore_color.rgb = RGBColor(255, 255, 255) if i % 2 == 0 else RGBColor(248, 250, 252)
+            if i == 0:
+                cell.fill.fore_color.rgb = C_NAVY_HEADER
+            elif j == 4:
+                cell.fill.fore_color.rgb = C_BLUE_BG
+            elif i % 2 == 0:
+                cell.fill.fore_color.rgb = C_ROW_ALT
+            else:
+                cell.fill.fore_color.rgb = C_WHITE
             p = cell.text_frame.paragraphs[0]
             p.alignment = PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER
             r = p.add_run()
             r.text = val
-            r.font.name = FONT_BODY
-            r.font.size = Pt(10)
-            if j == 5:
-                r.font.bold = True
-                r.font.color.rgb = C_BLUE_BRAND
-            elif j == 6:
-                r.font.bold = True
-                r.font.color.rgb = C_GREEN_OK
+            r.font.name = FONT_THAI
+            r.font.size = Pt(19 if i == 0 else 18)
+            r.font.bold = (i == 0 or j == 4)
+            r.font.color.rgb = C_WHITE if i == 0 else (C_BLUE_TAG if j == 4 else C_TEXT_BLACK)
+
+    # =========================================================================
+    # SLIDE 4: ข้อจำกัดด้านต้นทุนของไพราโนมิเตอร์มาตรฐาน (Big Numbers)
+    # =========================================================================
+    s4 = prs.slides.add_slide(blank_layout)
+    set_bg(s4, C_WHITE)
+    add_clean_header(s4, "ที่มาและความสำคัญของปัญหา", "ข้อจำกัดด้านต้นทุนของไพราโนมิเตอร์มาตรฐาน")
+
+    tb4 = s4.shapes.add_textbox(Inches(1.0), Inches(1.95), Inches(11.33), Inches(5.0))
+    tf4 = tb4.text_frame
+    tf4.word_wrap = True
+
+    p_n1 = tf4.paragraphs[0]
+    p_n1.alignment = PP_ALIGN.CENTER
+    r_n1 = p_n1.add_run()
+    r_n1.text = "150,000 ฿"
+    r_n1.font.name = FONT_HEAD
+    r_n1.font.size = Pt(72)
+    r_n1.font.bold = True
+    r_n1.font.color.rgb = C_BLUE_TAG
+
+    p_d1 = tf4.add_paragraph()
+    p_d1.alignment = PP_ALIGN.CENTER
+    r_d1 = p_d1.add_run()
+    r_d1.text = "ราคาต่อเครื่องของไพราโนมิเตอร์แบบเทอร์โมไพล์มาตรฐาน ISO 9060 Class A"
+    r_d1.font.name = FONT_THAI
+    r_d1.font.size = Pt(24)
+    r_d1.font.bold = True
+    r_d1.font.color.rgb = C_TEXT_BLACK
+
+    p_s1 = tf4.add_paragraph()
+    p_s1.alignment = PP_ALIGN.CENTER
+    p_s1.space_after = Pt(28)
+    r_s1 = p_s1.add_run()
+    r_s1.text = "อุปสรรคสำคัญต่อการวางโครงข่ายเซนเซอร์ตรวจวัดแสงอาทิตย์แบบกระจายตัวหนาแน่น (Distributed Sensor Network)"
+    r_s1.font.name = FONT_THAI
+    r_s1.font.size = Pt(19)
+    r_s1.font.color.rgb = C_TEXT_MUTED
+
+    p_n2 = tf4.add_paragraph()
+    p_n2.alignment = PP_ALIGN.CENTER
+    r_n2 = p_n2.add_run()
+    r_n2.text = "10,000 ฿ ++"
+    r_n2.font.name = FONT_HEAD
+    r_n2.font.size = Pt(64)
+    r_n2.font.bold = True
+    r_n2.font.color.rgb = C_BLUE_TAG
+
+    p_d2 = tf4.add_paragraph()
+    p_d2.alignment = PP_ALIGN.CENTER
+    r_d2 = p_d2.add_run()
+    r_d2.text = "ราคาต่อเครื่องของไพราโนมิเตอร์ระดับเริ่มต้น ISO 9060 Class C (ในขณะที่ต้นแบบโครงงานนี้ใช้งบวัสดุไม่เกิน 3,000 บาท)"
+    r_d2.font.name = FONT_THAI
+    r_d2.font.size = Pt(23)
+    r_d2.font.bold = True
+    r_d2.font.color.rgb = C_TEXT_BLACK
+
+    # =========================================================================
+    # SLIDE 5: เป้าหมายและแนวทางนวัตกรรมของโครงงานนี้ (4 Clean Cards)
+    # =========================================================================
+    s5 = prs.slides.add_slide(blank_layout)
+    set_bg(s5, C_WHITE)
+    add_clean_header(s5, "เป้าหมายการวิจัย", "เป้าหมายและแนวทางนวัตกรรมของโครงงานนี้")
+
+    cards_s5 = [
+        ("1. บูรณาการ 2 ปริญญา", "ผสานองค์ความรู้ด้าน Optical Physics (การสะท้อน, การหักเห, กฎโคไซน์) เข้ากับ IoT & 24-bit Embedded Engineering"),
+        ("2. จำลองทัศนศาสตร์ 3 มิติ", "สร้างโมเดล 3D CAD ของ BPX 61 และ BPW 34 เพื่อวิเคราะห์การหักเหแสงผ่านกระจกครอบด้วย Ray-tracing"),
+        ("3. วงจร TIA + ADC 24 บิต", "ออกแบบวงจรขยาย OPA380 คู่กับ ADS1220 และสมการชดเชยทางคณิตศาสตร์ 4 ขั้นตอน รองรับพิกัดถึง 4,000 W/m²"),
+        ("4. ต้นแบบจริง + 4-Layer PCB", "บัดกรีและทดสอบบอร์ด Perfboard จริง ออกแบบเคส 3D CAD และแผ่นวงจรพิมพ์ 4 เลเยอร์ในงบประมาณไม่เกิน 3,000 บาท")
+    ]
+    for idx, (ctitle, cbody) in enumerate(cards_s5):
+        left = 0.85 + idx * 2.98
+        c = add_card(s5, left, 2.2, 2.75, 4.3, bg_rgb=C_CARD_GRAY, border_rgb=C_BORDER_GRAY)
+        tf = c.text_frame
+        tf.word_wrap = True
+        tf.margin_left = tf.margin_right = tf.margin_top = Inches(0.25)
+        p = tf.paragraphs[0]
+        p.space_after = Pt(10)
+        r = p.add_run()
+        r.text = ctitle
+        r.font.name = FONT_THAI
+        r.font.size = Pt(22)
+        r.font.bold = True
+        r.font.color.rgb = C_TEXT_BLACK
+
+        pb = tf.add_paragraph()
+        rb = pb.add_run()
+        rb.text = cbody
+        rb.font.name = FONT_THAI
+        rb.font.size = Pt(18)
+        rb.font.color.rgb = C_TEXT_BODY
+
+    # =========================================================================
+    # SLIDE 6: คัดเลือกเซนเซอร์ (Polar Plot & Dimensional Drawing)
+    # =========================================================================
+    s6 = prs.slides.add_slide(blank_layout)
+    set_bg(s6, C_WHITE)
+    add_clean_header(s6, "ทฤษฎีและคุณลักษณะหัววัด", "การคัดเลือกเซนเซอร์: เปรียบเทียบโครงสร้างตัวถังและมุมรับแสง")
+
+    p_pol_bpx = os.path.join(img_dir, "(Directional Polar Plot) ของ BPX 61 .png")
+    p_pol_bpw = os.path.join(img_dir, "(Directional Polar Plot) ของ BPW 34.png")
+    p_dim_bpx = os.path.join(img_dir, "dimention(BPX61).png")
+    p_dim_bpw = os.path.join(img_dir, "dimention (BPW34).png")
+
+    add_pic_safe(s6, p_pol_bpx, 0.85, 1.95, height=2.45)
+    add_pic_safe(s6, p_dim_bpx, 3.85, 1.95, height=2.45)
+    add_pic_safe(s6, p_pol_bpw, 7.05, 1.95, height=2.45)
+    add_pic_safe(s6, p_dim_bpw, 9.95, 1.95, height=2.45)
+
+    # Table comparing BPX 61 vs BPW 34 below
+    rows_s6 = [
+        ["พารามิเตอร์ทางเทคนิค", "ams-OSRAM BPX 61", "ams-OSRAM BPW 34 (รุ่นที่เลือกใช้เป็นหลัก)"],
+        ["ขนาดชิปและพื้นที่รับแสงกัมมันต์", "2.65 × 2.65 mm (7.02 mm²)", "2.65 × 2.65 mm (7.02 mm² — เนื้อชิปเดียวกันเป๊ะ)"],
+        ["ช่วงความยาวคลื่นและสัมประสิทธิ์อุณหภูมิ", "400 – 1,100 nm  •  TC_I = +0.18 %/K", "400 – 1,100 nm  •  TC_I = +0.18 %/K"],
+        ["โครงสร้างตัวถังและมุมรับแสง", "กระป๋องโลหะ TO-39 ลึก 1.55–1.75 mm (ขอบบังแสงมุมเอียง)", "ตัวถังแบนราบ DIL ชิปอยู่ชิดผิวหน้า (รับแสงมุมกว้างตามกฎโคไซน์)"]
+    ]
+    tab6 = s6.shapes.add_table(len(rows_s6), 3, Inches(0.85), Inches(4.6), Inches(11.63), Inches(2.35)).table
+    tab6.columns[0].width = Inches(3.23)
+    tab6.columns[1].width = Inches(4.2)
+    tab6.columns[2].width = Inches(4.2)
+    for i, row in enumerate(rows_s6):
+        for j, val in enumerate(row):
+            cell = tab6.cell(i, j)
+            cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = C_NAVY_HEADER if i == 0 else (C_ROW_ALT if i % 2 == 0 else C_WHITE)
+            p = cell.text_frame.paragraphs[0]
+            p.alignment = PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER
+            r = p.add_run()
+            r.text = val
+            r.font.name = FONT_THAI
+            r.font.size = Pt(18 if i == 0 else 17)
+            r.font.bold = (i == 0 or (i == 3 and j in [1, 2]))
+            if i == 0:
+                r.font.color.rgb = C_WHITE
+            elif i == 3 and j == 1:
+                r.font.color.rgb = C_RED_TEXT
+            elif i == 3 and j == 2:
+                r.font.color.rgb = C_BLUE_TAG
             else:
-                r.font.color.rgb = C_TEXT_MAIN
+                r.font.color.rgb = C_TEXT_BLACK
 
-    # Summary Takeaway Banner Below Table
-    c_res = add_card(slide14, 0.8, 5.3, 11.733, 1.4, bg_rgb=RGBColor(240, 253, 244), border_rgb=C_GREEN_OK)
-    tf_r = c_res.text_frame
-    tf_r.word_wrap = True
-    tf_r.margin_left = tf_r.margin_right = tf_r.margin_top = tf_r.margin_bottom = Inches(0.15)
-    p = tf_r.paragraphs[0]
-    r = p.add_run()
-    r.text = "บทวิเคราะห์ผลลัพธ์เชิงวิศวกรรมจากการทดลองจริง:"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(12)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor(21, 128, 61)
+    # =========================================================================
+    # SLIDE 7: 3D CAD Design สำหรับทั้ง BPX 61 และ BPW 34 (รวมรูปใหม่!)
+    # =========================================================================
+    s7 = prs.slides.add_slide(blank_layout)
+    set_bg(s7, C_WHITE)
+    add_clean_header(
+        s7,
+        "การสร้างแบบจำลอง 3 มิติ (3D CAD Modeling)",
+        "การออกแบบโมเดล 3D CAD ของเซนเซอร์ BPX 61 (TO-39) และ BPW 34 (Flat DIL)",
+        "จำลองโครงสร้างจริงทุกชิ้นส่วน (Active Die 2.65×2.65 mm², ตัวถัง, ขาโลหะ และกระจกหน้าต่าง) เพื่อใช้ใน Ray-tracing"
+    )
 
-    pts_res = [
-        "ยืนยันการตอบสนองเชิงเส้น: เมื่อเพิ่มความเข้มแสง กระแสโฟโตเคอร์เรนต์ I_photo เพิ่มขึ้นอย่างต่อเนื่องจาก 0.009 µA ในความมืด สู่ 60.027 µA ที่แสงผสมสว่างสุด",
-        "ความมีประสิทธิภาพของ Pseudo-Differential: แรงดันออฟเซ็ตฐาน V_bias (ประมาณ 2.76–2.80 mV) ถูกหักลบออกอย่างแม่นยำ ทำให้สัญญาณ Net Diode เหลือเพียงกระแสแสงบริสุทธิ์",
-        "เสถียรภาพอุณหภูมิ: อุณหภูมิ REF5045 และ NTC สอดคล้องกันอยู่ในช่วง 34.7°C ถึง 35.3°C ยืนยันความพร้อมของฮาร์ดแวร์สำหรับการขึ้นรูปแผงวงจรจริง"
+    p_cad1 = os.path.join(img_dir, "CAD1.png")
+    p_cad2 = os.path.join(img_dir, "CAD2.png")
+    p_cad_bpw = os.path.join(img_dir, "cad_bpw34_model.png")
+
+    add_pic_safe(s7, p_cad1, 0.85, 2.05, width=3.8)
+    add_pic_safe(s7, p_cad2, 4.80, 2.05, width=3.8)
+    add_pic_safe(s7, p_cad_bpw, 8.75, 2.05, width=3.7)
+
+    captions_s7 = [
+        (0.85, 3.8, "(ก) โมเดล 3D CAD เซนเซอร์ BPX 61 ในตัวถังโลหะ TO-39"),
+        (4.80, 3.8, "(ข) มุมมองตัดขวางแสดงความลึกกระป๋อง 1.55–1.75 mm"),
+        (8.75, 3.7, "(ค) โมเดล 3D CAD เซนเซอร์ BPW 34 ตัวถังใสแบนราบ DIL")
     ]
-    for pt in pts_res:
-        p_pt = tf_r.add_paragraph()
+    for left, w, text in captions_s7:
+        tb = s7.shapes.add_textbox(Inches(left), Inches(5.85), Inches(w), Inches(0.8))
+        p = tb.text_frame.paragraphs[0]
+        p.alignment = PP_ALIGN.CENTER
+        r = p.add_run()
+        r.text = text
+        r.font.name = FONT_THAI
+        r.font.size = Pt(18)
+        r.font.bold = True
+        r.font.color.rgb = C_TEXT_BODY
+
+    # =========================================================================
+    # SLIDE 8: ผลการจำลองทางทัศนศาสตร์ BPX 61 vs BPW 34
+    # =========================================================================
+    s8 = prs.slides.add_slide(blank_layout)
+    set_bg(s8, C_WHITE)
+    add_clean_header(
+        s8,
+        "การจำลองทางทัศนศาสตร์ 3 มิติ (Optical Ray-Tracing)",
+        "ผลการจำลองการตอบสนองเชิงมุม: BPX 61 (ตัดแสงที่ 44°) เทียบกับ BPW 34",
+        tag_color=C_ORANGE_TAG
+    )
+
+    p_sim_bpx = os.path.join(script_dir, "sim_bpx61_with_without_glass.png")
+    p_sim_bpw = os.path.join(script_dir, "sim_bpw34_with_without_glass.png")
+    add_pic_safe(s8, p_sim_bpx, 0.85, 1.95, width=5.6)
+    add_pic_safe(s8, p_sim_bpw, 6.75, 1.95, width=5.7)
+
+    c8_bot = add_card(s8, 0.85, 5.45, 11.63, 1.5, bg_rgb=C_CARD_GRAY, border_rgb=C_BORDER_GRAY)
+    tf8 = c8_bot.text_frame
+    tf8.word_wrap = True
+    tf8.margin_left = tf8.margin_right = Inches(0.25)
+    tf8.margin_top = Inches(0.15)
+    p8_1 = tf8.paragraphs[0]
+    r8_1 = p8_1.add_run()
+    r8_1.text = "• การค้นพบจุดตัดแสงที่มุม 44° ของ BPX 61: "
+    r8_1.font.name = FONT_THAI
+    r8_1.font.size = Pt(19)
+    r8_1.font.bold = True
+    r8_1.font.color.rgb = C_RED_TEXT
+    r8_1b = p8_1.add_run()
+    r8_1b.text = "กระจกหน้าต่าง Schott 8250 (n = 1.487) หักเหลำแสงเอียงไปชนผนังกระป๋องโลหะ TO-39 เร็วกว่ากระป๋องเปล่า ทำให้สัญญาณเป็นศูนย์ตั้งแต่ 44°"
+    r8_1b.font.name = FONT_THAI
+    r8_1b.font.size = Pt(18)
+    r8_1b.font.color.rgb = C_TEXT_BODY
+
+    p8_2 = tf8.add_paragraph()
+    r8_2 = p8_2.add_run()
+    r8_2.text = "• ข้อได้เปรียบของ BPW 34 ใต้กระจกแซฟไฟร์แบน: "
+    r8_2.font.name = FONT_THAI
+    r8_2.font.size = Pt(19)
+    r8_2.font.bold = True
+    r8_2.font.color.rgb = C_BLUE_TAG
+    r8_2b = p8_2.add_run()
+    r8_2b.text = "ไร้ผนังกระป๋องบังแสง รับแสงได้ตลอด 0°–85° ตามกฎโคไซน์ (ที่มุม 44° ยังคงรับแสงได้ 0.710 เทียบกับ BPX 61 ที่มืดสนิท 0.000)"
+    r8_2b.font.name = FONT_THAI
+    r8_2b.font.size = Pt(18)
+    r8_2b.font.color.rgb = C_TEXT_BODY
+
+    # =========================================================================
+    # SLIDE 9: หลักการวงจรขยาย TIA (OPA380 + BPW 34) และการรักษา Linearity ถึง 4,000 W/m²
+    # =========================================================================
+    s9 = prs.slides.add_slide(blank_layout)
+    set_bg(s9, C_WHITE)
+    add_clean_header(
+        s9,
+        "การออกแบบวงจรแอนะล็อกฟรอนต์เอนด์ (TIA & Photodiode Physics)",
+        "หลักการทำงานของ OPA380 TIA และการรักษาความเป็นเชิงเส้นที่แดดจัดถึง 4,000 W/m²"
+    )
+
+    p_tia_sch = os.path.join(img_dir, "tia_schematic_kicad.png")
+    add_pic_safe(s9, p_tia_sch, 0.85, 1.9, width=5.5)
+
+    c9_eq = add_card(s9, 0.85, 5.15, 5.5, 1.85, bg_rgb=C_DARK_BG, border_rgb=None)
+    tf9_eq = c9_eq.text_frame
+    tf9_eq.word_wrap = True
+    tf9_eq.margin_left = tf9_eq.margin_right = Inches(0.22)
+    tf9_eq.margin_top = Inches(0.15)
+    p = tf9_eq.paragraphs[0]
+    r = p.add_run()
+    r.text = "สมการถ่ายโอน TIA & พิกัดความเชิงเส้น (Hamamatsu & Graeme):"
+    r.font.name = FONT_THAI
+    r.font.size = Pt(18)
+    r.font.bold = True
+    r.font.color.rgb = C_ORANGE_TAG
+
+    p2 = tf9_eq.add_paragraph()
+    p2.space_before = Pt(4)
+    r2 = p2.add_run()
+    r2.text = "V_op = V_bias + (I_P × R1)   |   I_sat(linear) = (V_Bi + V_bias) / R_S(photo)"
+    r2.font.name = FONT_HEAD
+    r2.font.size = Pt(13.5)
+    r2.font.bold = True
+    r2.font.color.rgb = C_WHITE
+
+    p3 = tf9_eq.add_paragraph()
+    p3.space_before = Pt(4)
+    r3 = p3.add_run()
+    r3.text = "ภายใต้กระจกแซฟไฟร์ใส (T ≈ 85%): กระแสแสง I_P ≈ 2.60 µA ต่อ 1 W/m²"
+    r3.font.name = FONT_THAI
+    r3.font.size = Pt(17)
+    r3.font.color.rgb = RGBColor(186, 230, 253)
+
+    # Right side: Why Vbias = 0.418V + Table of R1 up to 4,000 W/m²
+    c9_r1 = add_card(s9, 6.55, 1.9, 5.93, 2.35, bg_rgb=C_BLUE_BG, border_rgb=C_BLUE_TAG)
+    tf9_r1 = c9_r1.text_frame
+    tf9_r1.word_wrap = True
+    tf9_r1.margin_left = tf9_r1.margin_right = Inches(0.2)
+    tf9_r1.margin_top = Inches(0.12)
+    p = tf9_r1.paragraphs[0]
+    r = p.add_run()
+    r.text = "ทำไมต้องคงค่า V_bias = 0.418 V (R3=100k, R4=10k) เมื่อไม่ใช้ PTFE?"
+    r.font.name = FONT_THAI
+    r.font.size = Pt(19)
+    r.font.bold = True
+    r.font.color.rgb = C_BLUE_TAG
+
+    pts_s9 = [
+        "1) ยกพื้นหนี Saturation Floor (60–100 mV) ของ OPA380 ในระบบไฟเลี้ยงเดี่ยว (TI SBOS291G)",
+        "2) ต้านทานแรงดันตกคร่อมภายในเนื้อซิลิคอน (I_P × R_S,photo ≈ 3.8 mA × 50 Ω = 0.19 V) ไม่ให้รอยต่อ p-n พลิกเป็นไบแอสตรง (V_OC = 0.365 V) จึง Linear 100% แม้รับแดดจัดผ่านกระจกใส!",
+        "3) ไม่ใช้ไฟไบแอสสูง 10 V เพราะกระแสรั่วมืด I_dark พุ่งสูงขึ้นถึง 24 เท่า (2,000 pA) โดยไม่ได้เพิ่มกระแสแสง"
+    ]
+    for pt_txt in pts_s9:
+        p_pt = tf9_r1.add_paragraph()
+        p_pt.space_before = Pt(2)
         r_pt = p_pt.add_run()
-        r_pt.text = f"✔ {pt}"
-        r_pt.font.size = Pt(9.5)
-        r_pt.font.color.rgb = C_TEXT_SUB
+        r_pt.text = pt_txt
+        r_pt.font.name = FONT_THAI
+        r_pt.font.size = Pt(16.5)
+        r_pt.font.color.rgb = C_TEXT_BLACK
 
-    # =========================================================================
-    # SLIDE 15: Capstone 2 Roadmap & Implementation Milestones
-    # =========================================================================
-    slide15 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide15, C_BG_LIGHT)
-    add_header(slide15, "Future Roadmap", "แผนการดำเนินงานระยะถัดไปในโครงงาน 2 (Capstone Project 2)",
-               "กรอบระยะเวลาและเป้าหมายการยกระดับความเที่ยงตรงสู่มาตรฐานสากล ISO 9060 Class A")
-    add_footer(slide15, 16)
-
-    # 4 Milestone Horizontal Cards
-    w_m = 2.75
-    h_m = 4.8
-    m_lefts = [0.8, 3.8, 6.8, 9.8]
-
-    milestones = [
-        ("Milestone 1 (พ.ย. - ธ.ค. 2569)", "Hardware Fabrication & LDO Post-Regulation", C_BLUE_BRAND, [
-            "บัดกรีประกอบวงจรลงบน Perfboard",
-            "ติดตั้งตัวเก็บประจุ 10 µF X7R Low-ESR",
-            "สั่งผลิตแผ่นวงจรพิมพ์ Custom 4-Layer PCB",
-            "เพิ่ม Ultra-Low-Noise LDO (TPS7A)",
-            "ทดสอบระดับ Noise Floor < 4 µV_RMS"
-        ]),
-        ("Milestone 2 (ม.ค. - ก.พ. 2570)", "Optics Lab Empirical Validation", C_PURPLE_IOT, [
-            "เข้าทดสอบจริงในห้องแล็บภาควิชาฟิสิกส์",
-            "วัดสเปกตรัมด้วย Vernier LabQuest 2",
-            "ทดสอบการตอบสนองบนแท่นหมุน Goniometer",
-            "เปรียบเทียบผลจริงกับผลซิมของ BPW 34",
-            "ขอรับคำปรึกษาจาก ผศ.ดร.ประธาน บูรณศิริ"
-        ]),
-        ("Milestone 3 (มี.ค. 2570)", "Diffuser Dome & Housing Optimization", C_AMBER_WARN, [
-            "วิจัยและทดสอบ Cosine Diffuser Dome",
-            "ทดลองวัสดุ Quartz และ Optical Teflon",
-            "ปรับปรุงเพื่อแก้ปัญหา Fresnel Drop มุมชัน",
-            "สร้างตัวถัง Weatherproof กันน้ำกันฝุ่น",
-            "ติดตั้งระบบระบายความร้อนป้องกันความชื้น"
-        ]),
-        ("Milestone 4 (เม.ย. - พ.ค. 2570)", "Field Testing & ISO 9060 Calibration", C_GREEN_OK, [
-            "ติดตั้งทดสอบภาคสนามกลางแจ้ง 30 วัน",
-            "สอบเทียบเทียบกับ Pyranometer อ้างอิง",
-            "ประเมินค่า Uncertainty ทางมาตรวิทยา",
-            "พัฒนาแดชบอร์ด IoT Cloud แบบสมบูรณ์",
-            "สรุปผลการวิจัยและเล่มวิทยานิพนธ์ฉบับสมบูรณ์"
-        ])
+    # Mini table of R1 scaling up to 4,000 W/m²
+    rows_r1 = [
+        ["ค่าตัวต้านทาน R1 (R_TIA)", "ค่า R4 (V_bias)", "พิกัดวัดแสงสูงสุด (G_max)", "ความละเอียด 24-bit ADC"],
+        ["2,200 Ω (ค่าเริ่มต้นทดสอบ)", "10 kΩ (0.418 V)", "~714 W/m² (ในร่ม/ไฟฉาย)", "0.0003 W/m²"],
+        ["1,100 Ω (2.2k || 2.2k)", "10 kΩ (0.418 V)", "~1,430 W/m² (แดดจัดปกติ)", "0.0006 W/m²"],
+        ["680 Ω (แดดเขตร้อน)", "10 kΩ (0.418 V)", "~2,310 W/m² (ขอบเมฆรวมแสง)", "0.0010 W/m²"],
+        ["390 Ω (รุ่นท็อป Class A)", "10k–15k (0.42–0.58V)", "4,000 W/m² (Flagship Spec)", "0.0017 W/m² (~1 mV/W·m⁻²)"]
     ]
-
-    for idx, (m_title, m_sub, m_col, m_pts) in enumerate(milestones):
-        card = add_card(slide15, m_lefts[idx], 1.85, w_m, h_m, border_rgb=m_col, border_pt=1.5)
-        tf_m = card.text_frame
-        tf_m.word_wrap = True
-        tf_m.margin_left = tf_m.margin_right = tf_m.margin_top = tf_m.margin_bottom = Inches(0.15)
-        
-        p1 = tf_m.paragraphs[0]
-        r1 = p1.add_run()
-        r1.text = m_title
-        r1.font.name = FONT_HEAD
-        r1.font.size = Pt(11)
-        r1.font.bold = True
-        r1.font.color.rgb = m_col
-
-        p2 = tf_m.add_paragraph()
-        p2.space_after = Pt(8)
-        r2 = p2.add_run()
-        r2.text = m_sub
-        r2.font.name = FONT_HEAD
-        r2.font.size = Pt(9.5)
-        r2.font.bold = True
-        r2.font.color.rgb = C_TEXT_MAIN
-
-        for pt in m_pts:
-            p_pt = tf_m.add_paragraph()
-            p_pt.space_before = Pt(4)
-            r_pt = p_pt.add_run()
-            r_pt.text = f"• {pt}"
-            r_pt.font.size = Pt(8.8)
-            r_pt.font.color.rgb = C_TEXT_SUB
+    tab9 = s9.shapes.add_table(5, 4, Inches(6.55), Inches(4.4), Inches(5.93), Inches(2.6)).table
+    w9 = [1.65, 1.35, 1.65, 1.28]
+    for j, w in enumerate(w9):
+        tab9.columns[j].width = Inches(w)
+    for i, row in enumerate(rows_r1):
+        for j, val in enumerate(row):
+            cell = tab9.cell(i, j)
+            cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = C_NAVY_HEADER if i == 0 else (C_GREEN_BG if i == 4 else (C_ROW_ALT if i % 2 == 0 else C_WHITE))
+            p = cell.text_frame.paragraphs[0]
+            p.alignment = PP_ALIGN.CENTER
+            r = p.add_run()
+            r.text = val
+            r.font.name = FONT_THAI
+            r.font.size = Pt(15.5 if i == 0 else 15)
+            r.font.bold = (i == 0 or i == 4)
+            r.font.color.rgb = C_WHITE if i == 0 else (C_GREEN_TEXT if i == 4 else C_TEXT_BLACK)
 
     # =========================================================================
-    # SLIDE 16: Conclusion & Discussion / Q&A (Dark Executive Theme)
+    # SLIDE 10: สถาปัตยกรรมการอ่านสัญญาณและสมการชดเชยทางคณิตศาสตร์ 4 ขั้นตอน
     # =========================================================================
-    slide16 = prs.slides.add_slide(blank_layout)
-    set_slide_background(slide16, C_NAVY_DARK)
+    s10 = prs.slides.add_slide(blank_layout)
+    set_bg(s10, C_WHITE)
+    add_clean_header(
+        s10,
+        "สถาปัตยกรรมการอ่านสัญญาณและอัลกอริทึม",
+        "ระบบสมการชดเชยทางคณิตศาสตร์ 4 ขั้นตอน (4-Stage Compensation Pipeline)"
+    )
 
-    # Top Section: Title & 3 Accomplishment Bullets
-    tb_end = slide16.shapes.add_textbox(Inches(1.2), Inches(0.65), Inches(10.933), Inches(3.3))
-    tf_e = tb_end.text_frame
-    tf_e.word_wrap = True
-    tf_e.margin_left = tf_e.margin_right = tf_e.margin_top = tf_e.margin_bottom = 0
+    c10_l = add_card(s10, 0.85, 1.95, 5.6, 4.9, bg_rgb=C_DARK_BG, border_rgb=None)
+    tf10_l = c10_l.text_frame
+    tf10_l.word_wrap = True
+    tf10_l.margin_left = tf10_l.margin_right = Inches(0.28)
+    tf10_l.margin_top = Inches(0.25)
 
-    p = tf_e.paragraphs[0]
-    p.space_after = Pt(8)
+    p = tf10_l.paragraphs[0]
     r = p.add_run()
-    r.text = "สรุปผลสัมฤทธิ์โครงงาน 1 และขอคำชี้แนะจากอาจารย์ที่ปรึกษา"
-    r.font.name = FONT_HEAD
-    r.font.size = Pt(24)
+    r.text = "เทคนิคผลต่างเทียมและการชดเชยความร้อนครบวงจร"
+    r.font.name = FONT_THAI
+    r.font.size = Pt(20)
     r.font.bold = True
-    r.font.color.rgb = C_CYAN_LIGHT
+    r.font.color.rgb = C_ORANGE_TAG
 
-    bullets = [
-        ("ความสำเร็จด้านฮาร์ดแวร์และซอฟต์แวร์:", "พิสูจน์การทำงานจริงของวงจร AFE 24 บิต บน Breadboard ร่วมกับ REF5045 (4.500 V) และ ESP32-C6 Web Server รายงานข้อมูลได้สำเร็จสมบูรณ์"),
-        ("การออกแบบแผ่นวงจรพิมพ์ 4 เลเยอร์คู่ขนาน (V1.1 L1):", "ออกแบบ Custom 4-Layer PCB ทั้งรุ่น BPX 61 และ BPW 34 สมบูรณ์แบบด้วย KiCad 10.0 ผ่านการตรวจ DRC 100% (Zero Violations) พร้อมส่งผลิตสำหรับ Capstone 2"),
-        ("การค้นพบสำคัญทางทัศนศาสตร์:", "ชี้ชัดว่าตัวถัง TO-39 (BPX 61) มีการตัดแสงรุนแรงที่ 44° และยืนยันว่า BPW 34 ให้การตอบสนองที่สอดคล้องกับมาตรฐาน ISO 9060 Class A มากกว่า"),
-        ("ความพร้อมในการทดสอบจริง:", "จัดทำข้อเสนอการทดลองทางทัศนศาสตร์ (Proposed Lab Methodology) ไว้อย่างชัดเจน ทั้งแผนวัดสเปกตรัมและแผนวัดมุมด้วยแท่นหมุน")
+    stages = [
+        ("ขั้นที่ 1 (ชดเชยดริฟต์ของ REF5045 3 ppm/°C):", "V_REF(T) = 4.500 × [1 + 3×10⁻⁶ · (T_REF - 25)]"),
+        ("ขั้นที่ 2 (หักลบ V_bias แบบผลต่างเทียม 100%):", "I_P(raw) = [ (V_op - V_bias) - ΔV_zero ] / R1"),
+        ("ขั้นที่ 3 (ชดเชย Dark Current & TC_I +0.18%/K):", "I_P(25°C) = [I_P(raw) - I_dark(T)] / [1 + 0.0018·(T_NTC - 25)]"),
+        ("ขั้นที่ 4 (แปลงเป็นความเข้มรังสีดวงอาทิตย์สุทธิ):", "G_comp [W/m²] = I_P(25°C) / S_eff   (S_eff ≈ 2.60 µA/W·m⁻²)")
     ]
-    for h, b in bullets:
-        p_b = tf_e.add_paragraph()
-        p_b.space_before = Pt(6)
-        r_h = p_b.add_run()
-        r_h.text = f"✔ {h} "
+    for st_title, st_eq in stages:
+        pt = tf10_l.add_paragraph()
+        pt.space_before = Pt(10)
+        rt = pt.add_run()
+        rt.text = st_title + "\n"
+        rt.font.name = FONT_THAI
+        rt.font.size = Pt(18)
+        rt.font.bold = True
+        rt.font.color.rgb = C_WHITE
+        req = pt.add_run()
+        req.text = st_eq
+        req.font.name = FONT_HEAD
+        req.font.size = Pt(13)
+        req.font.bold = True
+        req.font.color.rgb = RGBColor(56, 189, 248)
+
+    # Right side: 3 Channel Mapping Cards (matching Slide 15 of user's PDF)
+    ch_cards = [
+        (
+            "AIN0 & AIN1 (0x81 / 0x91) : สัญญาณแสง V_op และแรงดันฐาน V_bias",
+            "บน Perfboard: AIN0 = V_op, AIN1 = V_bias (บน PCB สลับเป็น AIN0 = V_bias, AIN1 = V_op) หักลบออฟเซ็ตและสัญญาณรบกวนร่วมในซอฟต์แวร์ 100%"
+        ),
+        (
+            "AIN2 (0xA1) : อุณหภูมิผิวเซนเซอร์ NTC Thermistor 10 kΩ (±1%)",
+            "ดัดแนบชิดใต้ฐานโลหะของตัวเซนเซอร์แสง คำนวณอุณหภูมิผิวหัววัด T_diode เพื่อชดเชยทั้งกระแสรั่วมืด I_dark(T) และสัมประสิทธิ์อุณหภูมิ (+0.18 %/K)"
+        ),
+        (
+            "AIN3 (0xB1) : อุณหภูมิชิปอ้างอิง REF5045 (ขา 3 TEMP)",
+            "อ่านแรงดันขา TEMP (509 mV @ 25°C, 2.64 mV/°C) ติดตามเสถียรภาพความร้อนของแหล่งจ่ายอ้างอิง 4.500 V ร่วมกับเซนเซอร์ภายใน ADS1220"
+        )
+    ]
+    for idx, (ch_t, ch_b) in enumerate(ch_cards):
+        top = 1.95 + idx * 1.68
+        cc = add_card(s10, 6.75, top, 5.73, 1.5, bg_rgb=C_CARD_GRAY, border_rgb=C_BORDER_GRAY)
+        tfc = cc.text_frame
+        tfc.word_wrap = True
+        tfc.margin_left = tfc.margin_right = Inches(0.22)
+        tfc.margin_top = Inches(0.16)
+        p = tfc.paragraphs[0]
+        r = p.add_run()
+        r.text = ch_t
+        r.font.name = FONT_THAI
+        r.font.size = Pt(19)
+        r.font.bold = True
+        r.font.color.rgb = C_BLUE_TAG if idx == 0 else C_TEXT_BLACK
+
+        pb = tfc.add_paragraph()
+        pb.space_before = Pt(4)
+        rb = pb.add_run()
+        rb.text = ch_b
+        rb.font.name = FONT_THAI
+        rb.font.size = Pt(17.5)
+        rb.font.color.rgb = C_TEXT_BODY
+
+    # =========================================================================
+    # SLIDE 11: การวิเคราะห์และแก้ปัญหาทางวิศวกรรมฮาร์ดแวร์จริง
+    # =========================================================================
+    s11 = prs.slides.add_slide(blank_layout)
+    set_bg(s11, C_WHITE)
+    add_clean_header(
+        s11,
+        "การวิเคราะห์และแก้ปัญหาทางวิศวกรรม",
+        "การดีบักภาคจ่ายไฟ LDO TPS7A4901 และเสถียรภาพแรงดันอ้างอิง REF5045 (4.500 V)",
+        tag_color=C_ORANGE_TAG
+    )
+
+    # Red Card (Problems discovered)
+    c11_red = add_card(s11, 0.85, 2.0, 5.6, 4.8, bg_rgb=C_RED_BG, border_rgb=C_RED_BORDER)
+    tfr = c11_red.text_frame
+    tfr.word_wrap = True
+    tfr.margin_left = tfr.margin_right = Inches(0.28)
+    tfr.margin_top = Inches(0.25)
+    p = tfr.paragraphs[0]
+    r = p.add_run()
+    r.text = "ปัญหาทางวิศวกรรมที่ตรวจพบระหว่างสร้างต้นแบบ"
+    r.font.name = FONT_THAI
+    r.font.size = Pt(23)
+    r.font.bold = True
+    r.font.color.rgb = C_RED_TEXT
+
+    probs = [
+        ("1. ขา 9 (Thermal Pad) ของเรกูเลเตอร์ TPS7A4901 ลอย:", "เมื่อบัดกรีลงแผ่นแปลง MSOP-8 ทั่วไป ไฟออกตกเหลือ < 0.8 V เพราะไอซีตระกูลนี้บังคับให้แผ่นใต้ท้องชิป (ขา 9 EP) เป็นทางเดินกราวด์หลัก"),
+        ("2. กระแสรั่วไหลขา 5 (Trim/NR) ของ REF5045:", "โหนดความต้านทานสูง (High-Z) เกิดกระแสรั่วบนเบรดบอร์ดทำให้ไฟอ้างอิงตกเหลือ 4.382 V"),
+        ("3. ไฟเลี้ยง USB ดรอป & ค่า ESR ตัวเก็บประจุ:", "สาย USB แรงดันตกต่ำกว่า 4.70 V ทำให้ REF5045 หลุดสภาวะควบคุม (Dropout) และต้องการ C โหลดชนิด Low-ESR")
+    ]
+    for ph, pb in probs:
+        pp = tfr.add_paragraph()
+        pp.space_before = Pt(12)
+        rh = pp.add_run()
+        rh.text = ph + " "
+        rh.font.name = FONT_THAI
+        rh.font.size = Pt(19.5)
+        rh.font.bold = True
+        rh.font.color.rgb = C_RED_TEXT
+        rb = pp.add_run()
+        rb.text = pb
+        rb.font.name = FONT_THAI
+        rb.font.size = Pt(18.5)
+        rb.font.color.rgb = C_TEXT_BLACK
+
+    # Green Card (Solutions implemented on Perfboard)
+    c11_grn = add_card(s11, 6.85, 2.0, 5.63, 4.8, bg_rgb=C_GREEN_BG, border_rgb=C_GREEN_BORDER)
+    tfg = c11_grn.text_frame
+    tfg.word_wrap = True
+    tfg.margin_left = tfg.margin_right = Inches(0.28)
+    tfg.margin_top = Inches(0.25)
+    p = tfg.paragraphs[0]
+    r = p.add_run()
+    r.text = "การแก้ไขสำเร็จจริงบนบอร์ด Perfboard และ PCB"
+    r.font.name = FONT_THAI
+    r.font.size = Pt(23)
+    r.font.bold = True
+    r.font.color.rgb = C_GREEN_TEXT
+
+    sols = [
+        ("1. เชื่อมกราวด์ขา 9 (Exposed Pad) ของ TPS7A4901:", "ต่อสายกราวด์เข้ากับแผ่น Thermal Pad ใต้ท้องชิปโดยตรง ทำให้ได้ไฟเลี้ยงแอนะล็อกสะอาด +5.20 V นิ่งสนิททันที"),
+        ("2. ปลดขา 5 (DNP Trim) และใส่ C เซรามิก Low-ESR 10 µF:", "ขจัดกระแสรั่วไหลและรักษาเสถียรภาพลูปควบคุมภายใน ทำให้ REF5045 จ่ายแรงดันอ้างอิงได้ตรงพิกัด 4.500 V"),
+        ("3. สถาปัตยกรรมจ่ายไฟ 2 ชั้น (LM2596 -> TPS7A4901):", "สร้างส่วนต่างแรงดัน Headroom 700 mV เหนือ 4.500 V ไร้ผลกระทบจากการดึงกระแสส่ง Wi-Fi ของ ESP32-C6")
+    ]
+    for sh, sb in sols:
+        ps = tfg.add_paragraph()
+        ps.space_before = Pt(12)
+        rh = ps.add_run()
+        rh.text = sh + " "
+        rh.font.name = FONT_THAI
+        rh.font.size = Pt(19.5)
+        rh.font.bold = True
+        rh.font.color.rgb = C_GREEN_TEXT
+        rb = ps.add_run()
+        rb.text = sb
+        rb.font.name = FONT_THAI
+        rb.font.size = Pt(18.5)
+        rb.font.color.rgb = C_TEXT_BLACK
+
+    # =========================================================================
+    # SLIDE 12: บอร์ดต้นแบบ Perfboard จริง (3 มุมมองจริงที่เพิ่งอัปโหลด!)
+    # =========================================================================
+    s12 = prs.slides.add_slide(blank_layout)
+    set_bg(s12, C_WHITE)
+    add_clean_header(
+        s12,
+        "การสร้างต้นแบบฮาร์ดแวร์จริง (Perfboard Prototype 70×90 mm)",
+        "ผลงานการบัดกรีประกอบบอร์ดต้นแบบ Perfboard แบบแยกด้านรับแสงและด้านวงจร",
+        "ด้านบนติดตั้งเฉพาะหัววัดแสงและ NTC เพื่อให้เปิดมุมรับแสง 180° ไร้เงาบัง ส่วนด้านล่างรวมโมดูลวงจรครบทั้ง 6 ภาค"
+    )
+
+    pf_top = os.path.join(img_dir, "perfboard_top_view.jpg")
+    pf_side = os.path.join(img_dir, "perfboard_side_ntc_view.jpg")
+    pf_bot = os.path.join(img_dir, "perfboard_bottom_modules.jpg")
+
+    add_pic_safe(s12, pf_top, 0.85, 2.0, width=3.75)
+    add_pic_safe(s12, pf_side, 4.78, 2.0, width=3.75)
+    add_pic_safe(s12, pf_bot, 8.71, 2.0, width=3.75)
+
+    caps_s12 = [
+        (0.85, "1. ด้านบนบอร์ด (Top Optical Side)", "ติดตั้งเฉพาะเซนเซอร์แสงกึ่งกลางบอร์ดและ NTC ไร้ชิ้นส่วนสูงบังแสงที่มุมเอียง"),
+        (4.78, "2. มุมมองด้านข้างและการแนบ NTC", "ดัดหัววัด NTC 10 kΩ (สีเขียว) แนบสนิทกับฐานโลหะใต้ตัวถังเซนเซอร์เพื่อวัดอุณหภูมิจริง"),
+        (8.71, "3. ด้านล่างบอร์ด (Bottom Electronics)", "ประกอบด้วย LM2596, TPS7A4901 (+5.2V), REF5045 (4.5V), OPA380, ADS1220 และ ESP32-C6")
+    ]
+    for left, ct, cb in caps_s12:
+        card = add_card(s12, left, 5.05, 3.75, 1.85, bg_rgb=C_CARD_GRAY, border_rgb=C_BORDER_GRAY)
+        tf = card.text_frame
+        tf.word_wrap = True
+        tf.margin_left = tf.margin_right = Inches(0.18)
+        tf.margin_top = Inches(0.14)
+        p = tf.paragraphs[0]
+        r = p.add_run()
+        r.text = ct
+        r.font.name = FONT_THAI
+        r.font.size = Pt(19)
+        r.font.bold = True
+        r.font.color.rgb = C_BLUE_TAG
+        pb = tf.add_paragraph()
+        pb.space_before = Pt(4)
+        rb = pb.add_run()
+        rb.text = cb
+        rb.font.name = FONT_THAI
+        rb.font.size = Pt(17)
+        rb.font.color.rgb = C_TEXT_BODY
+
+    # =========================================================================
+    # SLIDE 13: ผลการอ่านสัญญาณจริง 24 บิตบนบอร์ดต้นแบบ Perfboard
+    # =========================================================================
+    s13 = prs.slides.add_slide(blank_layout)
+    set_bg(s13, C_WHITE)
+    add_clean_header(
+        s13,
+        "ผลการทดลองบนแผงวงจรต้นแบบ (Perfboard Validation)",
+        "ผลการอ่านสัญญาณจริง 24 บิตครบทั้ง 4 ช่องสัญญาณใน 4 สภาวะแสง"
+    )
+
+    rows_s13 = [
+        ["สภาวะแสงทดสอบจริง", "AIN0: V_op", "AIN1: V_bias", "AIN2: NTC (Temp)", "AIN3: Temp REF", "แรงดันสุทธิ ΔV", "กระแส I_P / ความเข้มแสง"],
+        ["1. ปิดทึบมืดสนิท (Dark)", "0.4185 V", "0.4180 V", "2.0942 V (28.48 °C)", "0.5940 V (32.20 °C)", "+0.50 mV", "0.227 µA (~0.09 W/m²)"],
+        ["2. แสงสว่างปกติในห้อง", "0.4405 V", "0.4180 V", "2.0940 V (28.49 °C)", "0.5942 V (32.27 °C)", "+22.50 mV", "10.23 µA (~3.93 W/m²)"],
+        ["3. โคมไฟส่องระยะใกล้", "1.5420 V", "0.4180 V", "2.0885 V (28.62 °C)", "0.5948 V (32.50 °C)", "+1,124.0 mV", "510.9 µA (~196.5 W/m²)"],
+        ["4. ไฟฉายแรงสูงจ่อชิด (R1=2.2k)", "4.4998 V (เต็ม)", "0.4181 V", "2.0810 V (28.80 °C)", "0.5951 V (32.61 °C)", "+4,081.7 mV", "1,855 µA (อิ่มตัวที่ ~714 W/m²)"]
+    ]
+    tab13 = s13.shapes.add_table(5, 7, Inches(0.85), Inches(1.95), Inches(11.63), Inches(3.9)).table
+    w13 = [2.25, 1.35, 1.3, 1.75, 1.75, 1.45, 1.78]
+    for j, w in enumerate(w13):
+        tab13.columns[j].width = Inches(w)
+
+    for i, row in enumerate(rows_s13):
+        for j, val in enumerate(row):
+            cell = tab13.cell(i, j)
+            cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = C_NAVY_HEADER if i == 0 else (C_BLUE_BG if i == 4 else (C_ROW_ALT if i % 2 == 0 else C_WHITE))
+            p = cell.text_frame.paragraphs[0]
+            p.alignment = PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER
+            r = p.add_run()
+            r.text = val
+            r.font.name = FONT_THAI
+            r.font.size = Pt(17.5 if i == 0 else 17)
+            r.font.bold = (i == 0 or j == 6)
+            r.font.color.rgb = C_WHITE if i == 0 else (C_BLUE_TAG if j == 6 else C_TEXT_BLACK)
+
+    tb13_note = s13.shapes.add_textbox(Inches(0.85), Inches(6.05), Inches(11.63), Inches(0.9))
+    p_n13 = tb13_note.text_frame.paragraphs[0]
+    r_n13 = p_n13.add_run()
+    r_n13.text = (
+        "สรุปผลการทดลองจริง: แรงดันฐาน V_bias นิ่งสนิทที่ 0.4180 V ตลอดทุกสภาวะแสง ช่วยยก V_op พ้นพื้นอิ่มตัว 100 mV ของ OPA380 อย่างสมบูรณ์ "
+        "และพิสูจน์ว่าเมื่อรับแสงความเข้มสูงผ่านกระจกใส การเปลี่ยน R1 ลงเป็น 680 Ω หรือ 390 Ω จะขยายพิกัดการวัดได้ถึง 2,310 – 4,000 W/m² ทันที"
+    )
+    r_n13.font.name = FONT_THAI
+    r_n13.font.size = Pt(18.5)
+    r_n13.font.color.rgb = C_TEXT_BODY
+
+    # =========================================================================
+    # SLIDE 14: ปัจจุบันทำอะไรไปแล้วบ้าง — เคส 3D CAD สำหรับ Perfboard + 4-Layer PCB
+    # =========================================================================
+    s14 = prs.slides.add_slide(blank_layout)
+    set_bg(s14, C_WHITE)
+    add_clean_header(
+        s14,
+        "ความก้าวหน้าด้านการออกแบบทางกลและแผ่นวงจรพิมพ์ (Mechanical & PCB Engineering)",
+        "การออกแบบเคส 3D CAD สำหรับ Perfboard และแผ่นวงจรพิมพ์ 4 เลเยอร์คู่ขนาน",
+        "พร้อมสำหรับการประกอบทดสอบกลางแจ้งและการผลิตแผ่นวงจรพิมพ์มาตรฐานโรงงาน (DRC Violations = 0)"
+    )
+
+    p_case = os.path.join(img_dir, "cad_perfboard_case_assy.png")
+    p_ring = os.path.join(img_dir, "cad_sapphire_retaining_ring.png")
+    p_pcb1 = os.path.join(img_dir, "pcb_3d_render_iso.png")
+    p_pcb2 = os.path.join(img_dir, "pcb_bpw34_3d_render_iso.png")
+
+    add_pic_safe(s14, p_case, 0.85, 2.0, width=2.75)
+    add_pic_safe(s14, p_ring, 3.78, 2.0, width=2.75)
+    add_pic_safe(s14, p_pcb1, 6.71, 2.0, width=2.75)
+    add_pic_safe(s14, p_pcb2, 9.64, 2.0, width=2.75)
+
+    cards_s14 = [
+        (0.85, "1. กล่องเคสสำหรับ Perfboard", "ออกแบบขนาดพอดีบอร์ด 70×90 mm พร้อมช่องหน้าต่างรับแสงทรงกลมด้านบนและพอร์ต Cable Gland กันน้ำด้านข้าง"),
+        (3.78, "2. แหวนล็อกกระจก Sapphire", "ฝาแหวนกดล็อกกระจกแซฟไฟร์ (Retaining Bezel Ring) แบบมีร่องขันล็อก 6 จุด ถอดสลับทดสอบกระจกได้สะดวก"),
+        (6.71, "3. 4-Layer PCB (รุ่น BPX 61)", "แผ่นวงจรพิมพ์ 4 เลเยอร์ รุ่น V1.1 L1_Analog สำหรับตัวถังโลหะ TO-39 พร้อมวงแหวน Guard Ring รอบขา -IN"),
+        (9.64, "4. 4-Layer PCB (รุ่น BPW 34)", "แผ่นวงจรพิมพ์ 4 เลเยอร์ รุ่น V1.1 L1_Analog_BPW34 สำหรับตัวถังแบนราบ DIL เพื่อทดสอบเปรียบเทียบแบบควบคุมตัวแปร")
+    ]
+    for left, ct, cb in cards_s14:
+        c = add_card(s14, left, 4.95, 2.75, 1.95, bg_rgb=C_CARD_GRAY, border_rgb=C_BORDER_GRAY)
+        tf = c.text_frame
+        tf.word_wrap = True
+        tf.margin_left = tf.margin_right = Inches(0.15)
+        tf.margin_top = Inches(0.12)
+        p = tf.paragraphs[0]
+        r = p.add_run()
+        r.text = ct
+        r.font.name = FONT_THAI
+        r.font.size = Pt(18)
+        r.font.bold = True
+        r.font.color.rgb = C_BLUE_TAG
+        pb = tf.add_paragraph()
+        pb.space_before = Pt(3)
+        rb = pb.add_run()
+        rb.text = cb
+        rb.font.name = FONT_THAI
+        rb.font.size = Pt(16)
+        rb.font.color.rgb = C_TEXT_BODY
+
+    # =========================================================================
+    # SLIDE 15: การออกแบบระเบียบวิธีการทดลองทางทัศนศาสตร์จริง (LabQuest 2 & Goniometer)
+    # =========================================================================
+    s15 = prs.slides.add_slide(blank_layout)
+    set_bg(s15, C_WHITE)
+    add_clean_header(
+        s15,
+        "ความร่วมมือกับภาควิชาฟิสิกส์ คณะวิทยาศาสตร์",
+        "การออกแบบระเบียบวิธีการทดลองทางทัศนศาสตร์จริง"
+    )
+
+    p_lq = os.path.join(img_dir, "labquest2_vernier_spectrometer.png")
+    p_gon = os.path.join(img_dir, "goniometer_blender_perspective.png")
+    add_pic_safe(s15, p_lq, 0.85, 1.95, height=2.9)
+    add_pic_safe(s15, p_gon, 6.25, 1.95, height=2.9)
+
+    lab_cards = [
+        ("1. วัดการส่องผ่านสเปกตรัม", "ใช้เครื่อง Vernier LabQuest 2 ช่วง 350–900 nm ทดสอบค่าร้อยละการส่องผ่าน (%T ≈ 85%) ของกระจกแซฟไฟร์จริง"),
+        ("2. ทดสอบมุมบนแท่นหมุน", "ยึดหัววัดร่วมแกนหมุน Optical Rotation Stage ปรับมุมรับแสงตั้งแต่ 0° ถึง 85° เทียบระหว่างมีและไม่มีกระจก"),
+        ("3. ลำแสงขนานเสมือน", "ตั้งหลอดทังสเตน-ฮาโลเจนไฟตรงห่าง 1.5–2.0 เมตร (มุมถ่างแสง < 0.08°) พร้อมท่อบังแสงสะท้อน Baffle Tube")
+    ]
+    for idx, (lt, lb) in enumerate(lab_cards):
+        left = 0.85 + idx * 3.98
+        c = add_card(s15, left, 5.05, 3.68, 1.85, bg_rgb=C_CARD_GRAY, border_rgb=C_BORDER_GRAY)
+        tf = c.text_frame
+        tf.word_wrap = True
+        tf.margin_left = tf.margin_right = Inches(0.2)
+        tf.margin_top = Inches(0.14)
+        p = tf.paragraphs[0]
+        r = p.add_run()
+        r.text = lt
+        r.font.name = FONT_THAI
+        r.font.size = Pt(20)
+        r.font.bold = True
+        r.font.color.rgb = C_TEXT_BLACK
+        pb = tf.add_paragraph()
+        pb.space_before = Pt(4)
+        rb = pb.add_run()
+        rb.text = lb
+        rb.font.name = FONT_THAI
+        rb.font.size = Pt(17.5)
+        rb.font.color.rgb = C_TEXT_BODY
+
+    # =========================================================================
+    # SLIDE 16: สถานะปัจจุบันและแผนการดำเนินงานสู่โครงงาน 2 (Updated Roadmap!)
+    # =========================================================================
+    s16 = prs.slides.add_slide(blank_layout)
+    set_bg(s16, C_WHITE)
+    add_clean_header(
+        s16,
+        "สรุปความก้าวหน้าและแผนงาน",
+        "สถานะปัจจุบันและแผนการดำเนินงานสู่โครงงาน 2"
+    )
+
+    roadmap_cards = [
+        (
+            "สำเร็จแล้ว 100%",
+            "จำลองแสง 3 มิติ & พิสูจน์ทฤษฎี",
+            "สร้าง 3D CAD ทั้ง BPX 61 และ BPW 34 พิสูจน์จุดตัดแสง 44° และกำหนดสมการชดเชยทางคณิตศาสตร์ 4 ขั้นตอน",
+            C_BLUE_BG, C_BLUE_TAG
+        ),
+        (
+            "สำเร็จแล้ว 100%",
+            "บัดกรี Perfboard & ออกแบบเคส",
+            "บัดกรีวงจรลงบอร์ด Perfboard (70×90 mm) แก้ปัญหาขา 9 ของ TPS7A4901 อ่านค่า 24 บิตสำเร็จ และออกแบบเคส 3D CAD + 4-Layer PCB",
+            C_GREEN_BG, C_GREEN_TEXT
+        ),
+        (
+            "โครงงาน 2 (ระยะที่ 1)",
+            "ทดสอบห้องปฏิบัติการฟิสิกส์",
+            "นำหัววัดจริงเข้าวัดสเปกตรัมด้วย Vernier LabQuest 2 และทดสอบการตอบสนองเชิงมุม 0°–85° บนแท่นหมุน",
+            C_AMBER_BG, C_ORANGE_TAG
+        ),
+        (
+            "โครงงาน 2 (ระยะที่ 2)",
+            "สอบเทียบกับเครื่องมาตรฐาน",
+            "ประกอบลงกล่องเคสกันน้ำพร้อมกระจกแซฟไฟร์ และนำไปตั้งวัดแสงอาทิตย์จริงเทียบกับไพราโนมิเตอร์มาตรฐาน",
+            C_CARD_GRAY, C_TEXT_BLACK
+        )
+    ]
+    for idx, (tag, rtitle, rbody, bg_c, tc) in enumerate(roadmap_cards):
+        left = 0.85 + idx * 2.98
+        c = add_card(s16, left, 2.2, 2.75, 4.3, bg_rgb=bg_c, border_rgb=C_BORDER_GRAY)
+        tf = c.text_frame
+        tf.word_wrap = True
+        tf.margin_left = tf.margin_right = tf.margin_top = Inches(0.24)
+        p_t = tf.paragraphs[0]
+        r_t = p_t.add_run()
+        r_t.text = tag
+        r_t.font.name = FONT_THAI
+        r_t.font.size = Pt(18)
+        r_t.font.bold = True
+        r_t.font.color.rgb = tc
+
+        p_h = tf.add_paragraph()
+        p_h.space_before = Pt(6)
+        p_h.space_after = Pt(8)
+        r_h = p_h.add_run()
+        r_h.text = rtitle
+        r_h.font.name = FONT_THAI
+        r_h.font.size = Pt(22)
         r_h.font.bold = True
-        r_h.font.size = Pt(11.5)
-        r_h.font.color.rgb = C_TEXT_LIGHT
+        r_h.font.color.rgb = C_TEXT_BLACK
+
+        p_b = tf.add_paragraph()
         r_b = p_b.add_run()
-        r_b.text = b
-        r_b.font.size = Pt(10.5)
-        r_b.font.color.rgb = C_TEXT_MUTED
+        r_b.text = rbody
+        r_b.font.name = FONT_THAI
+        r_b.font.size = Pt(18)
+        r_b.font.color.rgb = C_TEXT_BODY
 
-    # Middle Section: Questions for Dr. Prathan Banner Card
-    c_q = add_card(slide16, 1.2, 4.05, 10.933, 2.15, bg_rgb=C_SLATE_CARD, border_rgb=C_CYAN_ACCENT, border_pt=1.5)
-    tf_q = c_q.text_frame
-    tf_q.word_wrap = True
-    tf_q.margin_left = tf_q.margin_right = tf_q.margin_top = tf_q.margin_bottom = Inches(0.18)
-    
-    pq = tf_q.paragraphs[0]
-    rq = pq.add_run()
-    rq.text = "ประเด็นขอคำแนะนำและปรึกษาอาจารย์ ดร.ประธาน บูรณศิริ (Discussion Points):"
-    rq.font.name = FONT_HEAD
-    rq.font.size = Pt(12.5)
-    rq.font.bold = True
-    rq.font.color.rgb = C_CYAN_LIGHT
+    # =========================================================================
+    # SLIDE 17: Closing Slide (Dark Navy Theme matching Slide 24 of user's PDF)
+    # =========================================================================
+    s17 = prs.slides.add_slide(blank_layout)
+    set_bg(s17, C_DARK_BG)
 
-    q_items = [
-        "1. ความเป็นไปได้และช่วงเวลาที่เหมาะสมในการนำอุปกรณ์เข้าทดสอบกับชุด Vernier LabQuest 2 ในห้องปฏิบัติการฟิสิกส์ สจล.",
-        "2. คำแนะนำเกี่ยวกับข้อเสนอการจัดชุดแสงขนานแสวงเครื่อง (ท่อ Collimator + หลอดทังสเตน-ฮาโลเจน) บนแท่นหมุน Goniometer",
-        "3. แนวทางการออกแบบโดมกระจายแสง (Cosine Diffuser) เพื่อยกระดับความเที่ยงตรงสู่มาตรฐานสากล ISO 9060 Class A ในโครงงาน 2"
+    bar_end = s17.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(6.36), Inches(2.6), Inches(0.6), Inches(0.06))
+    bar_end.fill.solid()
+    bar_end.fill.fore_color.rgb = RGBColor(249, 115, 22) # orange accent line
+    bar_end.line.fill.background()
+
+    tb_end = s17.shapes.add_textbox(Inches(1.0), Inches(2.85), Inches(11.33), Inches(3.0))
+    tf_end = tb_end.text_frame
+    tf_end.word_wrap = True
+
+    pe1 = tf_end.paragraphs[0]
+    pe1.alignment = PP_ALIGN.CENTER
+    re1 = pe1.add_run()
+    re1.text = "ขอบคุณครับ • รับฟังข้อเสนอแนะ"
+    re1.font.name = FONT_THAI
+    re1.font.size = Pt(46)
+    re1.font.bold = True
+    re1.font.color.rgb = C_WHITE
+
+    pe2 = tf_end.add_paragraph()
+    pe2.alignment = PP_ALIGN.CENTER
+    pe2.space_before = Pt(12)
+    re2 = pe2.add_run()
+    re2.text = "การพัฒนาระบบวัดการแผ่รังสีแสงอาทิตย์ความแม่นยำสูง (Capstone Project 1)"
+    re2.font.name = FONT_THAI
+    re2.font.size = Pt(22)
+    re2.font.color.rgb = RGBColor(148, 163, 184)
+
+    pe3 = tf_end.add_paragraph()
+    pe3.alignment = PP_ALIGN.CENTER
+    pe3.space_before = Pt(24)
+    re3 = pe3.add_run()
+    re3.text = "เตชินท์ รัฐวงษา  •  ณัฐพัชร์ รัตนนวงศ์  •  พีรวิช เฉลิมเกียรติ"
+    re3.font.name = FONT_THAI
+    re3.font.size = Pt(19)
+    re3.font.color.rgb = RGBColor(203, 213, 225)
+
+    candidates = [
+        "69_IoT_Pyranometer_Capstone1_Slides.pptx",
+        "69_IoT_Pyranometer_Capstone1_Slides_Latest.pptx",
+        "69_IoT_Pyranometer_Capstone1_Slides_Clean.pptx"
     ]
-    for q in q_items:
-        p_qi = tf_q.add_paragraph()
-        p_qi.space_before = Pt(4)
-        r_qi = p_qi.add_run()
-        r_qi.text = q
-        r_qi.font.size = Pt(10)
-        r_qi.font.color.rgb = C_TEXT_LIGHT
+    saved_path = None
+    for fname in candidates:
+        out_path = os.path.join(script_dir, fname)
+        try:
+            prs.save(out_path)
+            print(f"[OK] Clean Presentation saved to: {out_path}")
+            saved_path = out_path
+            break
+        except PermissionError:
+            print(f"[NOTE] '{fname}' is open in PowerPoint. Trying next...")
+    return saved_path
 
-    # Bottom Section: Thank you / Q&A Box
-    tb_ty = slide16.shapes.add_textbox(Inches(1.2), Inches(6.35), Inches(10.933), Inches(0.6))
-    tf_ty = tb_ty.text_frame
-    tf_ty.margin_left = tf_ty.margin_right = tf_ty.margin_top = tf_ty.margin_bottom = 0
-    p_ty = tf_ty.paragraphs[0]
-    p_ty.alignment = PP_ALIGN.CENTER
-    r_ty = p_ty.add_run()
-    r_ty.text = "THANK YOU  |  Q & A"
-    r_ty.font.name = FONT_HEAD
-    r_ty.font.size = Pt(18)
-    r_ty.font.bold = True
-    r_ty.font.color.rgb = C_CYAN_LIGHT
-
-    out_file = os.path.join(script_dir, "69_IoT_Pyranometer_Capstone1_Slides.pptx")
-    try:
-        prs.save(out_file)
-        print(f"[OK] PowerPoint Presentation successfully created at: {out_file}")
-    except PermissionError:
-        out_file = os.path.join(script_dir, "69_IoT_Pyranometer_Capstone1_Slides_Latest.pptx")
-        prs.save(out_file)
-        print(f"[OK] Main slides file locked by PowerPoint; saved updated presentation to: {out_file}")
-    return out_file
 
 if __name__ == "__main__":
     create_presentation()

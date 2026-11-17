@@ -65,6 +65,35 @@ def add_page_number_to_footer(footer, alignment=WD_ALIGN_PARAGRAPH.CENTER):
     p._p.append(fldSimple)
     return p
 
+def add_page_number_to_header(header, alignment=WD_ALIGN_PARAGRAPH.RIGHT):
+    """
+    ใส่เลขหน้าแบบ Dynamic Field (w:fldSimple w:instr='PAGE') ที่มุมบนขวาใน Header
+    ตามรูปแบบปริญญานิพนธ์ สจล. (69_IoT_66011392.pdf)
+    """
+    p = header.paragraphs[0]
+    p.alignment = alignment
+    r = p.add_run()
+    set_font_sarabun(r, size_pt=15)
+    fldSimple = OxmlElement('w:fldSimple')
+    fldSimple.set(qn('w:instr'), 'PAGE')
+    p._p.append(fldSimple)
+    return p
+
+def set_outline_level(paragraph, level=0):
+    """
+    กำหนดระดับโครงร่าง (Outline Level 0, 1, 2) ใน XML (<w:outlineLvl>)
+    เพื่อให้ MS Word และโปรแกรมอ่าน PDF สร้างแถบสารบัญด้านซ้าย (Navigation Pane / PDF Bookmarks)
+    โดยอัตโนมัติเหมือนในไฟล์ตัวอย่าง 69_IoT_66011392.pdf
+    """
+    pPr = paragraph._p.get_or_add_pPr()
+    for child in list(pPr):
+        if child.tag.endswith('outlineLvl'):
+            pPr.remove(child)
+    outlineLvl = OxmlElement('w:outlineLvl')
+    outlineLvl.set(qn('w:val'), str(level))
+    pPr.append(outlineLvl)
+    return paragraph
+
 def set_section_numbering(section, fmt="decimal", start=1):
     """
     กำหนดรูปแบบเลขหน้าของ Section:
@@ -107,6 +136,7 @@ def add_thesis_chapter_heading(doc, chap_num, chap_title):
     p_title.paragraph_format.keep_with_next = True
     r_title = p_title.add_run(chap_title)
     set_font_sarabun(r_title, size_pt=18, bold=True)
+    set_outline_level(p_title, 0)
     return p_title
 
 def add_section_heading(doc, sec_num, sec_title):
@@ -121,6 +151,7 @@ def add_section_heading(doc, sec_num, sec_title):
     prefix = f"{sec_num} " if sec_num else ""
     r = p.add_run(f"{prefix}{sec_title}")
     set_font_sarabun(r, size_pt=16, bold=True)
+    set_outline_level(p, 1)
     return p
 
 def add_subsection_heading(doc, subsec_num, subsec_title):
@@ -136,6 +167,7 @@ def add_subsection_heading(doc, subsec_num, subsec_title):
     prefix = f"{subsec_num} " if subsec_num else ""
     r = p.add_run(f"{prefix}{subsec_title}")
     set_font_sarabun(r, size_pt=16, bold=True)
+    set_outline_level(p, 2)
     return p
 
 def add_thai_body_p(doc, text, space_after=6, indent=0.5, line_spacing=1.15):
@@ -254,6 +286,23 @@ def set_table_clean_borders(table, border_color="000000", border_sz="4"):
         f'  <w:right w:val="single" w:sz="{border_sz}" w:space="0" w:color="{border_color}"/>\n'
         f'  <w:insideH w:val="single" w:sz="{border_sz}" w:space="0" w:color="{border_color}"/>\n'
         f'  <w:insideV w:val="single" w:sz="{border_sz}" w:space="0" w:color="{border_color}"/>\n'
+        f'</w:tblBorders>'
+    )
+    tblPr.append(borders)
+
+def set_table_no_borders(table):
+    """
+    กำหนดตารางแบบไร้เส้นขอบ (สำหรับจัดแนวข้อมูลหัวเรื่องหน้าอนุมัติและบทคัดย่อ ตามแบบ 69_IoT_66011392.pdf)
+    """
+    tblPr = table._tbl.tblPr
+    borders = parse_xml(
+        f'<w:tblBorders {nsdecls("w")}>\n'
+        f'  <w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>\n'
+        f'  <w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/>\n'
+        f'  <w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/>\n'
+        f'  <w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/>\n'
+        f'  <w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto"/>\n'
+        f'  <w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto"/>\n'
         f'</w:tblBorders>'
     )
     tblPr.append(borders)

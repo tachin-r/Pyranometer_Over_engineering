@@ -4,13 +4,25 @@
 #include <math.h>
 
 // ==============================================================================
-// ⚙️ เลือกรุ่นฮาร์ดแวร์ที่กำลังทดสอบ (Hardware Target Selection)
+// ⚙️ 1. เลือกรุ่นฮาร์ดแวร์ที่กำลังทดสอบ (Hardware Target Selection)
 // ==============================================================================
 // เลือกว่ากำลังรันโค้ดบน "บอร์ดไข่ปลา (Perfboard Prototype)" หรือ "บอร์ดจริง (PCB L1_Analog)"
 // เพียงแค่ Comment / Uncomment 1 บรรทัดด้านล่างนี้:
-#define TARGET_PERFBOARD    // <-- กำลังทดสอบบนบอร์ดทดลองไข่ปลา (Perfboard)
-// #define TARGET_PCB       // <-- ใช้งานบนแผ่นปริ้นท์จริง (Custom PCB L1_Analog)
+#define TARGET_PERFBOARD    // <-- กำลังทดสอบบนบอร์ดทดลองไข่ปลา (Perfboard: AIN0=Vop, AIN1=Vbias)
+// #define TARGET_PCB       // <-- ใช้งานบนแผ่นปริ้นท์จริง (Custom PCB L1_Analog: AIN0=Vbias, AIN1=Vop)
 // ==============================================================================
+
+// ==============================================================================
+// ⚙️ 2. ตั้งค่าตัวต้านทานขยายกระแส R_TIA (R1) และการจับคู่ Vbias เพื่อรับประกัน Linearity 100%
+// ==============================================================================
+// หมายเหตุการออกแบบภายใต้หน้าต่างกระจกแซฟไฟร์ใส (Sapphire Glass, T ≈ 85%, I_photo ≈ 2.6 µA ต่อ W/m²):
+// ในโหมดรับแสงที่ไบแอสต่ำ ความต้านทานแผ่นตามแนวราบและชั้น Intrinsic ที่ยังไม่ Deplete (R_S,photo ≈ 30–50 Ω)
+// จะสร้างแรงดันตกคร่อมภายในชิป V_drop = I_P * R_S,photo ดังนั้นต้องคงค่า Vbias ≥ V_drop เพื่อไม่ให้รอยต่อภายในไบแอสตรง:
+// - R_TIA = 2200.0 Ω (คู่กับ R4 = 10k, Vbias = 0.418V) -> วัดได้สูงสุด ~714 W/m²  (หรือ ~2,000 W/m² หากมีแผ่นกรองแสง PTFE)
+// - R_TIA = 1100.0 Ω (2.2k || 2.2k, Vbias = 0.418V)   -> วัดได้สูงสุด ~1,430 W/m² (Linear 100% ตลอดช่วงแดดธรรมชาติ)
+// - R_TIA = 680.0  Ω (คู่กับ R4 = 10k, Vbias = 0.418V) -> วัดได้สูงสุด ~2,310 W/m² (Linear 100% รองรับ Cloud Enhancement)
+// - R_TIA = 390.0  Ω (หรือ 360 Ω คู่กับ R4 = 10k–15k, Vbias = 0.42–0.58V) -> วัดได้สูงสุด ~4,000 W/m² (Class A Flagship, Linear 100%)
+const float R_TIA = 2200.0f;  // <-- เปลี่ยนค่านี้ตามตัวต้านทาน R1 ที่ใส่จริงบนบอร์ด (หน่วย: โอห์ม)
 
 // ================= ตั้งค่า Wi-Fi =================
 const char* ssid     = "Khaitapad69";     // <-- ใส่ชื่อ Wi-Fi ของคุณ (รองรับ 2.4GHz)
@@ -19,12 +31,12 @@ const char* password = "Isuskuy555";     // <-- ใส่รหัสผ่า�
 WebServer server(80);
 
 // ================= ESP32-C6 Pinout Definitions =================
-// กำหนดขา SPI และควบคุม ADS1220:
-#define PIN_DRDY  5   // DRDY (Data Ready จาก ADS1220 ขา 14)
-#define PIN_MISO  4   // MISO / DOUT (จาก ADS1220 ขา 15)
-#define PIN_MOSI  3   // MOSI / DIN  (เข้า ADS1220 ขา 16)
-#define PIN_SCLK  2   // SCLK        (เข้า ADS1220 ขา 1)
-#define PIN_CS    1   // CS          (เข้า ADS1220 ขา 2)
+// กำหนดขา SPI และควบคุม ADS1220 ตามการต่อใช้งานจริง:
+#define PIN_DRDY  5   // DRDY (Data Ready จาก ADS1220)
+#define PIN_MISO  4   // MISO / DOUT
+#define PIN_MOSI  3   // MOSI / DIN
+#define PIN_SCLK  2   // SCLK
+#define PIN_CS    1   // CS
 #define PIN_LED   15  // LED แสดงสถานะบนบอร์ด ESP32-C6
 
 // ================= ADS1220 Commands =================
@@ -33,19 +45,29 @@ WebServer server(80);
 #define CMD_RDATA 0x10
 #define CMD_WREG  0x40
 
-const float VREF = 4.5;       // แรงดันอ้างอิงจาก REF5045 (+4.5Vref ต่อเข้า REFP0 ขา 9)
-const float R_TIA = 2200.0;   // ตัวต้านทาน Feedback R1 = 2.2k บน OPA388/OPA380
+const float VREF = 4.500f;    // แรงดันอ้างอิงจาก REF5045 (+4.5Vref ต่อเข้า REFP0 ขา 9)
 const uint32_t DRDY_TIMEOUT_MS = 150;
 
 // ================= พารามิเตอร์ NTC Thermistor (TTC3A103F39HAEY) =================
 // อ้างอิงตาม Datasheet Thinking Electronic TTC 03 Type:
 // R25 = 10 kΩ (±1%) ที่ 25 °C, B25/85 = 3975 K (±1.5%)
 // วงจรแบ่งแรงดัน: +4.5Vref -> R7 (10 kΩ) -> [โหนด NTC] -> RT1 (NTC 10 kΩ) -> GND
-const float NTC_R25 = 10000.0;     // 10 kΩ
-const float NTC_T25 = 298.15;      // 25 °C ในหน่วย Kelvin (25 + 273.15)
-const float NTC_BETA = 3975.0;     // Beta B25/85 = 3975 K
-const float R_PULLUP = 10000.0;    // R7 = 10 kΩ
-const float V_SUPPLY_NTC = 4.5;    // ต่อกับรางไฟ +4.5Vref (Ratiometric กับ VREF)
+const float NTC_R25      = 10000.0f; // 10 kΩ ที่ 25 °C
+const float NTC_T25      = 298.15f;  // 25 °C ในหน่วย Kelvin (25 + 273.15)
+const float NTC_BETA     = 3975.0f;  // Beta B25/85 = 3975 K
+const float R_PULLUP     = 10000.0f; // R7 = 10 kΩ
+const float V_SUPPLY_NTC = 4.500f;   // ต่อกับรางไฟ +4.5Vref (Ratiometric กับ VREF)
+
+// ================= พารามิเตอร์แบบจำลองชดเชยทางคณิตศาสตร์ 4 ขั้นตอน =================
+// อ้างอิงตาม Datasheet OSRAM BPW 34 (Version 1.5) และ TI OPA380 / REF5045:
+const float V_OFFSET_ZERO_CAL = 0.00000f; // Stage 1: ค่าออฟเซ็ตศูนย์ขณะมืดสนิท (Vop - Vbias ตอนมืด, หน่วย V)
+const float IDARK_10V_25C_UA  = 0.00200f; // Stage 2: Dark current ที่ VR=10V, 25°C = 2 nA (0.002 µA, กราฟ OHF00080 หน้า 5)
+const float ALPHA_TC_BPW34    = 0.00180f; // Stage 3: สัมประสิทธิ์อุณหภูมิกระแสแสง TC_I = +0.18 %/K (+0.0018 /°C, หน้า 3)
+const float ALPHA_TC_REF5045  = 0.000003f;// Stage 4: สัมประสิทธิ์อุณหภูมิ REF5045 = 3 ppm/°C (3e-6 /°C)
+// ค่าคงที่การแปลงกระแสโฟโต้ (µA) เป็นความเข้มรังสีแสงอาทิตย์ (W/m²) ภายใต้กระจก Sapphire Glass:
+// I_photo(1 W/m²) ≈ A_active (7.02e-6 m²) * S_eff (0.435 A/W) * T_sapphire (0.85) ≈ 2.60 µA/(W/m²)
+// ดังนั้น K_CAL ≈ 1 / 2.60 ≈ 0.3846 (W/m²) ต่อ µA (ปรับจูนเทียบกับเครื่องอ้างอิงได้)
+const float K_CAL_WM2_PER_UA  = 0.3846f;
 
 // ================= ADS1220 MUX Mapping ตามบอร์ด =================
 #if defined(TARGET_PERFBOARD)
@@ -98,14 +120,21 @@ SPISettings adsSpiSettings(1000000, MSBFIRST, SPI_MODE1);
 
 // ตัวแปรเก็บค่าล่าสุดสำหรับส่งขึ้นหน้าเว็บและ Serial
 int32_t g_raw[4] = {0};
-float   g_volt[4] = {0.0};
+float   g_volt[4] = {0.0f};
 int16_t g_rawAdsTemp = 0;
-float   g_adsTempC = 0.0;
-float   g_vDiodeActual = 0.0;
-float   g_iPhoto_uA = 0.0;
-float   g_refTempC = 0.0;
-float   g_rNtc = 0.0;
-float   g_ntcTempC = 0.0;
+float   g_adsTempC = 0.0f;
+
+// ตัวแปรผลลัพธ์จากระบบสมการชดเชย 4 ขั้นตอน (4-Stage Compensation Pipeline)
+float   g_vDiodeNet = 0.0f;       // Stage 1: ΔV_TIA = (Vop - Vbias) - V_offset_zero (V)
+float   g_iRaw_uA = 0.0f;         // Stage 2a: I_raw = ΔV_TIA / R_TIA (µA)
+float   g_iDark_nA = 0.0f;        // Stage 2b: I_dark(Vbias, T_NTC) (nA)
+float   g_iPhoto_uA = 0.0f;       // Stage 2c: I_photo = I_raw - I_dark (µA)
+float   g_iPhoto25C_uA = 0.0f;    // Stage 3:  I_photo,25C ชดเชยอุณหภูมิไดโอด +0.18%/K (µA)
+float   g_irradiance_Wm2 = 0.0f;  // Stage 4:  ความเข้มรังสีแสงอาทิตย์สุทธิ G (W/m²)
+
+float   g_refTempC = 0.0f;
+float   g_rNtc = 0.0f;
+float   g_ntcTempC = 25.0f;
 bool    g_allSuccess = true;
 
 unsigned long lastReadTime = 0;
@@ -113,17 +142,62 @@ const unsigned long READ_INTERVAL = 1000; // อ่านค่าทุกๆ 1
 
 // ================= ฟังก์ชันคำนวณอุณหภูมิ NTC จากแรงดัน =================
 float calculateNtcTemp(float vNtc) {
-  if (vNtc <= 0.01 || vNtc >= (V_SUPPLY_NTC - 0.01)) {
-    return -999.0; // ค่าผิดพลาด (เซนเซอร์หลุดหรือลัดวงจร)
+  if (vNtc <= 0.01f || vNtc >= (V_SUPPLY_NTC - 0.01f)) {
+    return -999.0f; // ค่าผิดพลาด (เซนเซอร์หลุดหรือลัดวงจร)
   }
   float rNtc = R_PULLUP * (vNtc / (V_SUPPLY_NTC - vNtc));
   g_rNtc = rNtc;
 
   // สมการ B-parameter: 1/T = 1/T0 + (1/B) * ln(R/R0)
   float steinhart = log(rNtc / NTC_R25) / NTC_BETA;
-  steinhart += 1.0 / NTC_T25;
-  float tempK = 1.0 / steinhart;
-  return tempK - 273.15;
+  steinhart += 1.0f / NTC_T25;
+  float tempK = 1.0f / steinhart;
+  return tempK - 273.15f;
+}
+
+// ================= ฟังก์ชันคำนวณชดเชย 4 ขั้นตอนอย่างเป็นระบบ =================
+void runSystematicCompensationPipeline() {
+  float vOp   = g_volt[CH_VOP_IDX];
+  float vBias = g_volt[CH_VBIAS_IDX];
+  float tNtc  = (g_ntcTempC > -100.0f) ? g_ntcTempC : 25.0f;
+  float tRef  = g_refTempC;
+
+  // ---------------------------------------------------------------------------
+  // Stage 1: Differential Ratiometric Baseline Cancellation
+  // หักลบแรงดันไบแอส Vbias (~0.418V หรือ 0.15-0.20V) ออกแบบจุดต่อจุดในเวลาจริง
+  // ---------------------------------------------------------------------------
+  g_vDiodeNet = (vOp - vBias) - V_OFFSET_ZERO_CAL;
+
+  // ---------------------------------------------------------------------------
+  // Stage 2: Transimpedance & Semiconductor Dark-Current Thermal Model
+  // จากกราฟ OHF00080 และ OHF05717 ใน Datasheet BPW 34:
+  // I_dark แปรผันตรงกับแรงดันไบแอสย้อนกลับ VR = Vbias และเพิ่มขึ้น 2 เท่าทุกๆ +10°C
+  // ---------------------------------------------------------------------------
+  g_iRaw_uA = (g_vDiodeNet / R_TIA) * 1e6f;
+
+  float vReverse = (vBias > 0.0f) ? vBias : 0.0f;
+  float iDark_uA = IDARK_10V_25C_UA * (vReverse / 10.0f) * powf(2.0f, (tNtc - 25.0f) / 10.0f);
+  g_iDark_nA = iDark_uA * 1000.0f; // เก็บในหน่วย nA เพื่อแสดงผล
+
+  g_iPhoto_uA = g_iRaw_uA - iDark_uA;
+  if (g_iPhoto_uA < 0.0f) {
+    g_iPhoto_uA = 0.0f; // ป้องกันค่าติดลบเล็กน้อยจาก Noise ขณะมืดสนิท
+  }
+
+  // ---------------------------------------------------------------------------
+  // Stage 3: Spectral Responsivity Temperature Coefficient Compensation
+  // ชดเชยสัมประสิทธิ์อุณหภูมิของกระแสลัดวงจร BPW 34 (TC_I = +0.18 %/K)
+  // ---------------------------------------------------------------------------
+  float tempFactorDiode = 1.0f + ALPHA_TC_BPW34 * (tNtc - 25.0f);
+  if (tempFactorDiode < 0.5f) tempFactorDiode = 1.0f;
+  g_iPhoto25C_uA = g_iPhoto_uA / tempFactorDiode;
+
+  // ---------------------------------------------------------------------------
+  // Stage 4: Reference Drift Correction & Solar Irradiance Conversion (W/m²)
+  // ชดเชยการเลื่อนตามอุณหภูมิของ REF5045 (3 ppm/°C) และแปลงเป็น W/m²
+  // ---------------------------------------------------------------------------
+  float refDriftFactor = 1.0f + ALPHA_TC_REF5045 * (tRef - 25.0f);
+  g_irradiance_Wm2 = K_CAL_WM2_PER_UA * g_iPhoto25C_uA * refDriftFactor;
 }
 
 // ================= ฟังก์ชันควบคุม ADS1220 =================
@@ -210,10 +284,10 @@ bool readChannel(uint8_t chIndex, int32_t &rawOut, float &voltOut) {
   sendCommand(CMD_START);
 
   if (readADC24(rawOut)) {
-    voltOut = ((float)rawOut / 8388607.0) * VREF;
+    voltOut = ((float)rawOut / 8388607.0f) * VREF;
     return true;
   } else {
-    voltOut = 0.0;
+    voltOut = 0.0f;
     return false;
   }
 }
@@ -225,7 +299,7 @@ bool readADS1220Temp(int16_t &rawOut, float &tempOut) {
   if (!waitForDRDY(DRDY_TIMEOUT_MS)) {
     recoverADS1220();
     rawOut = 0;
-    tempOut = 0.0;
+    tempOut = 0.0f;
     return false;
   }
 
@@ -244,7 +318,7 @@ bool readADS1220Temp(int16_t &rawOut, float &tempOut) {
   raw = raw >> 2;
 
   rawOut = raw;
-  tempOut = (float)raw * 0.03125;
+  tempOut = (float)raw * 0.03125f;
   return true;
 }
 
@@ -261,12 +335,14 @@ void handleRoot() {
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
     h2 { color: #00e676; text-align: center; margin-bottom: 5px; }
     .hw-mode { text-align: center; color: #64b5f6; font-size: 0.95em; margin-bottom: 20px; }
-    .container { max-width: 650px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    .container { max-width: 680px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; }
     th { color: #81c784; }
     .highlight { background: #263238; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #00e676; }
     .highlight p { margin: 8px 0; }
+    .irr-box { background: #1b5e20; padding: 14px; border-radius: 8px; margin-top: 15px; text-align: center; border: 1px solid #4caf50; }
+    .irr-val { font-size: 1.8em; font-weight: bold; color: #ffff00; }
     .status-ok { color: #00e676; font-weight: bold; }
     .status-err { color: #ff5252; font-weight: bold; }
     .badge { background: #004d40; color: #80cbc4; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
@@ -275,8 +351,8 @@ void handleRoot() {
 </head>
 <body>
   <div class="container">
-    <h2>ESP32-C6 & ADS1220 Monitor</h2>
-    <div class="hw-mode">โหมดฮาร์ดแวร์: <span class="badge-hw">)rawliteral" + String(HW_TARGET_NAME) + R"rawliteral(</span></div>
+    <h2>ESP32-C6 & ADS1220 Precision Pyranometer</h2>
+    <div class="hw-mode">โหมดฮาร์ดแวร์: <span class="badge-hw">)rawliteral" + String(HW_TARGET_NAME) + R"rawliteral(</span> | R_TIA: <span class="badge">)rawliteral" + String(R_TIA, 0) + R"rawliteral( &Omega;</span></div>
     <p>สถานะ ADC: <span id="status" class="status-ok">กำลังโหลด...</span></p>
     <table>
       <thead>
@@ -287,11 +363,17 @@ void handleRoot() {
       </tbody>
     </table>
 
+    <div class="irr-box">
+      <div>☀️ ความเข้มรังสีแสงอาทิตย์สุทธิ (Compensated Solar Irradiance)</div>
+      <div class="irr-val"><span id="irr">0.00</span> W/m&sup2;</div>
+    </div>
+
     <div class="highlight">
-      <p><strong>⚡ V_diode (Vop - Vbias):</strong> <span id="vdiode">0.000</span> mV</p>
-      <p><strong>💡 Photocurrent (I_photo):</strong> <span id="iphoto">0.000</span> &mu;A</p>
+      <p><strong>Stage 1 | &Delta;V_TIA (Vop - Vbias):</strong> <span id="vdiode">0.000</span> mV</p>
+      <p><strong>Stage 2 | I_raw / I_dark(T):</strong> <span id="iraw">0.000</span> &mu;A / <span id="idark">0.000</span> nA</p>
+      <p><strong>Stage 3 | I_photo,25&deg;C (Temp Compensated):</strong> <span id="iphoto25">0.000</span> &mu;A</p>
       <hr style="border: 0; border-top: 1px solid #37474f; margin: 10px 0;">
-      <p><strong>🌡️ อุณหภูมิบอร์ด NTC (TTC3A103):</strong> <span id="ntctemp" style="color:#ffca28; font-size:1.15em; font-weight:bold;">0.00</span> &deg;C <span class="badge" id="rntc">10.00 k&Omega;</span></p>
+      <p><strong>🌡️ อุณหภูมิหัววัด NTC (TTC3A103):</strong> <span id="ntctemp" style="color:#ffca28; font-size:1.15em; font-weight:bold;">0.00</span> &deg;C <span class="badge" id="rntc">10.00 k&Omega;</span></p>
       <p><strong>🌡️ อุณหภูมิ REF5045:</strong> <span id="reftemp">0.00</span> &deg;C</p>
       <p><strong>🔥 อุณหภูมิภายในชิป ADS1220:</strong> <span id="adstemp">0.00</span> &deg;C</p>
     </div>
@@ -321,7 +403,10 @@ void handleRoot() {
           }
           document.getElementById('ch-table').innerHTML = rows;
           document.getElementById('vdiode').innerText = (data.vDiode * 1000).toFixed(3);
-          document.getElementById('iphoto').innerText = data.iPhoto.toFixed(3);
+          document.getElementById('iraw').innerText = data.iRaw.toFixed(3);
+          document.getElementById('idark').innerText = data.iDark_nA.toFixed(4);
+          document.getElementById('iphoto25').innerText = data.iPhoto25C.toFixed(3);
+          document.getElementById('irr').innerText = data.irradiance.toFixed(2);
           document.getElementById('ntctemp').innerText = data.ntcTemp.toFixed(2);
           document.getElementById('rntc').innerText = (data.rNtc / 1000.0).toFixed(2) + ' k\u03A9';
           document.getElementById('reftemp').innerText = data.refTemp.toFixed(2);
@@ -342,11 +427,16 @@ void handleData() {
   String json = "{";
   json += "\"success\":" + String(g_allSuccess ? "true" : "false") + ",";
   json += "\"hw\":\"" + String(HW_TARGET_NAME) + "\",";
+  json += "\"rTia\":" + String(R_TIA, 1) + ",";
   json += "\"labels\":[\"" + String(CH_LABELS[0]) + "\",\"" + String(CH_LABELS[1]) + "\",\"" + String(CH_LABELS[2]) + "\",\"" + String(CH_LABELS[3]) + "\"],";
   json += "\"raw\":[" + String(g_raw[0]) + "," + String(g_raw[1]) + "," + String(g_raw[2]) + "," + String(g_raw[3]) + "],";
   json += "\"volt\":[" + String(g_volt[0], 5) + "," + String(g_volt[1], 5) + "," + String(g_volt[2], 5) + "," + String(g_volt[3], 5) + "],";
-  json += "\"vDiode\":" + String(g_vDiodeActual, 6) + ",";
+  json += "\"vDiode\":" + String(g_vDiodeNet, 6) + ",";
+  json += "\"iRaw\":" + String(g_iRaw_uA, 3) + ",";
+  json += "\"iDark_nA\":" + String(g_iDark_nA, 4) + ",";
   json += "\"iPhoto\":" + String(g_iPhoto_uA, 3) + ",";
+  json += "\"iPhoto25C\":" + String(g_iPhoto25C_uA, 3) + ",";
+  json += "\"irradiance\":" + String(g_irradiance_Wm2, 2) + ",";
   json += "\"rNtc\":" + String(g_rNtc, 1) + ",";
   json += "\"ntcTemp\":" + String(g_ntcTempC, 2) + ",";
   json += "\"refTemp\":" + String(g_refTempC, 2) + ",";
@@ -430,21 +520,20 @@ void loop() {
       g_allSuccess = false;
     }
 
-    // 3. ประมวลผลสัญญาณจริงของไดโอด (Vop - Vbias เสมอ โดยดึงจาก Index ที่ตรงกับบอร์ดที่เลือก)
-    // V_diode = Vop - Vbias
-    g_vDiodeActual = g_volt[CH_VOP_IDX] - g_volt[CH_VBIAS_IDX];
-    g_iPhoto_uA = (g_vDiodeActual / R_TIA) * 1e6;
-
-    // 4. แปลงอุณหภูมิ REF5045 จากช่อง Temp
-    g_refTempC = (g_volt[CH_TEMP_IDX] - 0.509) / 0.00264;
-
-    // 5. แปลงอุณหภูมิ NTC Thermistor บนบอร์ด (TTC3A103F39HAEY จากช่อง NTC)
+    // 3. แปลงอุณหภูมิ REF5045 จากช่อง Temp และอุณหภูมิ NTC บนบอร์ด (TTC3A103F39HAEY)
+    g_refTempC = (g_volt[CH_TEMP_IDX] - 0.509f) / 0.00264f;
     g_ntcTempC = calculateNtcTemp(g_volt[CH_NTC_IDX]);
 
-    // 6. แสดงผลทาง Serial Monitor
+    // 4. รันระบบสมการชดเชยทางคณิตศาสตร์ 4 ขั้นตอน (4-Stage Compensation Pipeline)
+    runSystematicCompensationPipeline();
+
+    // 5. แสดงผลทาง Serial Monitor
     Serial.println("-----------------------------------------------------------------------------------------");
     Serial.print("[Active Hardware]: ");
-    Serial.println(HW_TARGET_NAME);
+    Serial.print(HW_TARGET_NAME);
+    Serial.print(" | R_TIA = ");
+    Serial.print(R_TIA, 1);
+    Serial.println(" Ohm");
     if (!g_allSuccess) {
       Serial.println("[STATUS] Some channels timed out and were recovered.");
     }
@@ -465,26 +554,32 @@ void loop() {
     Serial.print(g_adsTempC, 2);
     Serial.println(" °C");
 
-    Serial.println("--- Computed Values ---");
-    Serial.print("-> Net Diode Voltage (Vop - Vbias): ");
-    Serial.print(g_vDiodeActual * 1000.0, 3);
-    Serial.print(" mV | I_photo: ");
+    Serial.println("--- 4-Stage Systematic Compensation Pipeline ---");
+    Serial.print("  [Stage 1] Net TIA Voltage (Vop - Vbias): ");
+    Serial.print(g_vDiodeNet * 1000.0f, 3);
+    Serial.println(" mV");
+
+    Serial.print("  [Stage 2] Raw Current: ");
+    Serial.print(g_iRaw_uA, 3);
+    Serial.print(" uA | Dark Current(Vbias, T_NTC): ");
+    Serial.print(g_iDark_nA, 4);
+    Serial.print(" nA -> Net I_photo: ");
     Serial.print(g_iPhoto_uA, 3);
     Serial.println(" uA");
 
-    Serial.print("-> NTC Board Temperature (CH");
-    Serial.print(CH_NTC_IDX);
-    Serial.print("): ");
+    Serial.print("  [Stage 3] Temp-Compensated I_photo(25°C): ");
+    Serial.print(g_iPhoto25C_uA, 3);
+    Serial.print(" uA (NTC = ");
     Serial.print(g_ntcTempC, 2);
-    Serial.print(" °C (R_ntc = ");
-    Serial.print(g_rNtc / 1000.0, 2);
+    Serial.print(" °C, R_ntc = ");
+    Serial.print(g_rNtc / 1000.0f, 2);
     Serial.println(" kOhm)");
 
-    Serial.print("-> REF5045 Temperature (CH");
-    Serial.print(CH_TEMP_IDX);
-    Serial.print("): ");
+    Serial.print("  [Stage 4] Solar Irradiance (G): ");
+    Serial.print(g_irradiance_Wm2, 2);
+    Serial.print(" W/m^2 (REF5045 Temp = ");
     Serial.print(g_refTempC, 2);
-    Serial.println(" °C");
+    Serial.println(" °C)");
 
     if (WiFi.status() == WL_CONNECTED) {
       Serial.print("-> Web Dashboard IP: http://");

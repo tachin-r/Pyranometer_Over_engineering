@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+ FreeCAD Document, see https://www.freecad.org for more information…
+-->
+<Document SchemaVersion="1" HasExpansion="1">
+    <Expand />
+    <ViewProviderData Count="0">
+    </ViewProviderData>
+    <Camera settings="OrthographicCamera {&#10;  viewportMapping ADJUST_CAMERA&#10;  position 40.957512 -70.940689 57.35767&#10;  orientation 0.86492187 0.23175442 0.44519675  1.0835806&#10;  nearDistance 99.900002&#10;  farDistance 100.10001&#10;  aspectRatio 1&#10;  focalDistance 100&#10;  height 100&#10;&#10;}&#10;"/>
+</Document>
